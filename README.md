@@ -103,19 +103,19 @@ http://127.0.0.1:8000/
 ## 📷 Screenshots
 
 ### 🌐 Landing Page
-![Landing](./screenshots/landing.png)
+![Landing](screenshots/landing.png)
 
 ### 🔐 Login Page
-![Login](./screenshots/login.png)
+![Login](screenshots/login.png)
 
 ### 📊 Admin Dashboard
-![Dashboard](./screenshots/dashboard.png)
+![Dashboard](screenshots/dashboard.png)
 
 ### 🛡️ Security Visitor Console
-![Visitor Console](./screenshots/visitor-console.png)
+![Visitor Console](screenshots/visitor-console.png)
 
 ### 🚪 Check-In Panel
-![Check-In](./screenshots/checkin.png)
+![Check-In](screenshots/checkin.png)
 
 🧪 Testing & Validation
 Functional testing completed
