@@ -1,0 +1,114 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block title %}{{ page.title|default:"Status" }} | GateSphere{% endblock %}
+{% block body_class %}no-sidebar{% endblock %}
+{% block extra_css %}{% include "pages/_support_page_styles.html" %}{% endblock %}
+{% block content %}
+<div class="gs-special-page" data-live-page="status" data-live-url="{% url 'pages:page_live_data' 'status' %}">
+    <section class="gs-special-hero">
+        <div class="gs-special-hero-copy">
+            <div class="gs-special-eyebrow">
+                <span class="gs-special-icon gs-special-tone-{{ page_meta.accent|default:'success' }}">
+                    <i class="bi {{ page_meta.icon|default:'bi-activity' }}"></i>
+                </span>
+                <span>{{ page_meta.eyebrow|default:"System Health" }}</span>
+            </div>
+            <h1 class="gs-special-title">{{ page.title|default:"Status" }}</h1>
+            <p class="gs-special-subtitle">{{ page_meta.subtitle }}</p>
+            <div class="gs-special-actions">
+                <a href="#service-status" class="gs-special-btn gs-special-btn-primary">
+                    <i class="bi bi-cpu"></i>View Services
+                </a>
+                <a href="{% url 'pages:contact' %}" class="gs-special-btn">
+                    <i class="bi bi-headset"></i>Report an Issue
+                </a>
+            </div>
+        </div>
+        <div class="gs-special-hero-side">
+            {% for stat in hero_stats %}
+            <div class="gs-special-stat">
+                <span class="gs-special-stat-label">{{ stat.label }}</span>
+                <strong class="gs-special-stat-value" data-status-hero="{{ stat.label|slugify }}">{{ stat.value }}</strong>
+                <span class="gs-special-stat-help">{{ stat.help }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <div class="gs-special-layout">
+        <div class="gs-special-main gs-special-stack">
+            <section class="gs-special-card" id="service-status">
+                <div class="gs-special-card-head">
+                    <div>
+                        <p class="gs-special-card-kicker">Overall Status</p>
+                        <h2 class="gs-special-card-title">System overview</h2>
+                    </div>
+                    <span class="gs-special-badge gs-special-tone-success" data-overall-status>{{ overall_status }}</span>
+                </div>
+                <div class="gs-special-card-body">
+                    <div class="gs-special-richtext" style="margin-bottom:18px;">{{ rendered_page_content }}</div>
+                    <div class="gs-special-list" data-status-services>
+                        {% for service in services %}
+                        <div class="gs-special-service">
+                            <div class="gs-special-service-copy">
+                                <strong>{{ service.name }}</strong>
+                                <small>{{ service.detail }}</small>
+                            </div>
+                            <span class="gs-special-pill gs-special-tone-{{ service.tone }}">{{ service.status }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="gs-special-card">
+                <div class="gs-special-card-head">
+                    <div>
+                        <p class="gs-special-card-kicker">Latest Activity</p>
+                        <h2 class="gs-special-card-title">Realtime incident feed</h2>
+                    </div>
+                </div>
+                <div class="gs-special-card-body">
+                    <div class="gs-special-timeline" data-status-incidents>
+                        {% for incident in incidents %}
+                        <article class="gs-special-timeline-item">
+                            <span class="gs-special-timeline-icon gs-special-tone-{{ incident.tone }}">
+                                <i class="bi bi-pulse"></i>
+                            </span>
+                            <div class="gs-special-timeline-copy">
+                                <strong>{{ incident.title }}</strong>
+                                <span class="gs-special-muted">{{ incident.detail }}</span>
+                                <small>{{ incident.time|timesince }} ago</small>
+                            </div>
+                            <span class="gs-special-pill gs-special-tone-{{ incident.tone }}">{{ incident.status }}</span>
+                        </article>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <aside class="gs-special-aside gs-special-stack">
+            <section class="gs-special-card">
+                <div class="gs-special-card-head">
+                    <div>
+                        <p class="gs-special-card-kicker">Live Metrics</p>
+                        <h2 class="gs-special-card-title">Operational snapshot</h2>
+                    </div>
+                </div>
+                <div class="gs-special-card-body">
+                    <div class="gs-special-meta-list" data-status-metrics>
+                        {% for metric in status_metrics %}
+                        <div class="gs-special-meta-row">
+                            <span>{{ metric.label }}</span>
+                            <strong>{{ metric.value }}</strong>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+        </aside>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/pages-special.js' %}?v=1"></script>{% endblock %}

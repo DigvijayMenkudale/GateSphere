@@ -1,0 +1,40 @@
+{% extends "base/base.html" %}
+
+
+{% block body_class %}dashboard-layout{% endblock %}
+
+{% block content %}
+<h2>Check-In Panel</h2>
+<p>Visitors approved and ready for check-in:</p>
+
+{% if visitors %}
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Contact</th>
+            <th>Host</th>
+            <th>Purpose</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for visitor in visitors %}
+        <tr>
+            <td>{{ visitor.full_name }}</td>
+            <td>{{ visitor.contact_number }}</td>
+            <td>{{ visitor.host.username }}</td>
+            <td>{{ visitor.purpose }}</td>
+            <td>
+                <a href="{% url 'check_in_visitor' visitor.id %}" class="btn btn-primary btn-sm">Check In</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="alert alert-info mt-3">
+    No visitors ready for check-in.
+</div>
+{% endif %}
+{% endblock %}

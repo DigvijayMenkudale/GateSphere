@@ -1,0 +1,76 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block body_class %}dashboard-layout{% endblock %}
+
+{% block content %}
+<div class="gs-page-header">
+    <div class="gs-title-row">
+        <div>
+            <h1 class="gs-page-title"><i class="bi bi-bell text-primary me-2"></i>Notifications</h1>
+            <p class="gs-page-subtitle">Realtime system alerts and recent activity</p>
+        </div>
+        <div class="gs-date-pill"><i class="bi bi-activity me-1"></i><span data-notifications-page-summary>{{ notification_total }} active alerts</span></div>
+    </div>
+</div>
+
+<div class="gs-grid-2" style="align-items:start;">
+    <div class="gs-table-card">
+        <div class="gs-panel-head">
+            <div class="gs-card-title"><i class="bi bi-grid text-primary"></i><span>Overview</span></div>
+        </div>
+        <div class="gs-panel-body">
+            <div class="gs-notification-list" data-notifications-page-categories>
+                {% for item in notification_categories %}
+                <div class="gs-notification-item">
+                    <span class="gs-notification-item-icon gs-tone-{{ item.tone }}">
+                        <i class="bi {{ item.icon }}"></i>
+                    </span>
+                    <div class="gs-notification-item-copy">
+                        <div class="gs-notification-item-top">
+                            <span class="gs-notification-item-title">{{ item.label }}</span>
+                            <span class="gs-notification-item-count">{{ item.count }}</span>
+                        </div>
+                        <div class="gs-notification-item-detail">{{ item.detail }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="gs-empty-state" style="min-height:180px;">
+                    <i class="bi bi-bell-slash"></i>
+                    <p>No notification categories available</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="gs-table-card">
+        <div class="gs-panel-head">
+            <div class="gs-card-title"><i class="bi bi-clock-history text-primary"></i><span>Recent Activity</span></div>
+        </div>
+        <div class="gs-panel-body">
+            <div class="gs-notification-list" data-notifications-page-recent>
+                {% for item in notification_recent_items %}
+                <div class="gs-notification-item">
+                    <span class="gs-notification-item-icon gs-tone-{{ item.tone }}">
+                        <i class="bi {{ item.icon }}"></i>
+                    </span>
+                    <div class="gs-notification-item-copy">
+                        <div class="gs-notification-item-top">
+                            <span class="gs-notification-item-title">{{ item.title }}</span>
+                            <span class="gs-notification-item-time">{{ item.time }}</span>
+                        </div>
+                        <div class="gs-notification-item-meta">{{ item.meta }}</div>
+                        <div class="gs-notification-item-detail">{{ item.detail }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="gs-empty-state" style="min-height:180px;">
+                    <i class="bi bi-clock"></i>
+                    <p>No recent activity right now</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,122 @@
+<div class="gs-doc-page">
+    <section class="gs-doc-hero gs-doc-reveal">
+        <div class="gs-doc-hero-copy">
+            <div class="gs-doc-eyebrow">
+                <span class="gs-doc-icon-badge gs-doc-accent-{{ page_meta.accent|default:'primary' }}">
+                    <i class="bi {{ page_meta.icon|default:'bi-file-earmark-text' }}"></i>
+                </span>
+                <span>{{ page_meta.eyebrow|default:"Live Page" }}</span>
+            </div>
+            <h1 class="gs-doc-title">{{ page.title }}</h1>
+            <p class="gs-doc-subtitle">{{ page_meta.subtitle|default:"Realtime content delivered from the GateSphere content database." }}</p>
+            <div class="gs-doc-actions">
+                {% if user.is_authenticated %}
+                <a href="/dashboard/" class="gs-doc-action gs-doc-action-primary">
+                    <i class="bi bi-arrow-left"></i>Dashboard
+                </a>
+                {% else %}
+                <a href="/" class="gs-doc-action gs-doc-action-primary">
+                    <i class="bi bi-house-door"></i>Home
+                </a>
+                {% endif %}
+                <a href="#page-content" class="gs-doc-action">
+                    <i class="bi bi-arrow-down-circle"></i>Read Page
+                </a>
+            </div>
+        </div>
+        <div class="gs-doc-hero-meta">
+            <div class="gs-doc-stat-card gs-doc-reveal">
+                <span class="gs-doc-stat-label">Updated</span>
+                <strong class="gs-doc-stat-value">{{ page.updated_at|date:"M d, Y" }}</strong>
+                <span class="gs-doc-stat-help">Live from the content table</span>
+            </div>
+            <div class="gs-doc-stat-card gs-doc-reveal">
+                <span class="gs-doc-stat-label">Read Time</span>
+                <strong class="gs-doc-stat-value" data-countup="{{ read_time }}">{{ read_time }} min</strong>
+                <span class="gs-doc-stat-help">Estimated from current content</span>
+            </div>
+            <div class="gs-doc-stat-card gs-doc-reveal">
+                <span class="gs-doc-stat-label">Word Count</span>
+                <strong class="gs-doc-stat-value" data-countup="{{ word_count }}">{{ word_count }}</strong>
+                <span class="gs-doc-stat-help">Rendered dynamically</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="gs-doc-grid">
+        <article class="gs-doc-article gs-doc-reveal" id="page-content">
+            <div class="gs-doc-card-head">
+                <div>
+                    <p class="gs-doc-card-kicker">Content</p>
+                    <h2 class="gs-doc-card-title">Live {{ page.title }}</h2>
+                </div>
+                <span class="gs-doc-card-pill">
+                    <i class="bi bi-circle-fill"></i> Active
+                </span>
+            </div>
+            <div class="gs-doc-richtext" data-page-body>
+                {{ rendered_page_content }}
+            </div>
+        </article>
+
+        <aside class="gs-doc-rail">
+            <section class="gs-doc-side-card gs-doc-reveal">
+                <div class="gs-doc-side-head">
+                    <h3>On This Page</h3>
+                    <span class="gs-doc-side-dot"></span>
+                </div>
+                <div class="gs-doc-toc" data-page-toc>
+                    <a href="#page-content" class="gs-doc-toc-link is-active">Overview</a>
+                </div>
+            </section>
+
+            <section class="gs-doc-side-card gs-doc-reveal">
+                <div class="gs-doc-side-head">
+                    <h3>Explore</h3>
+                    <span class="gs-doc-side-dot"></span>
+                </div>
+                <div class="gs-doc-link-list">
+                    {% for related_page in related_pages %}
+                    <a href="{{ related_page.url }}" class="gs-doc-link-item">
+                        <span class="gs-doc-link-copy">
+                            <strong>{{ related_page.title }}</strong>
+                            <small>Updated {{ related_page.updated_at|date:"M d, Y" }}</small>
+                        </span>
+                        <i class="bi bi-arrow-up-right"></i>
+                    </a>
+                    {% empty %}
+                    <div class="gs-doc-empty-note">
+                        <i class="bi bi-info-circle"></i>
+                        <span>No related pages are active right now.</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="gs-doc-side-card gs-doc-reveal">
+                <div class="gs-doc-side-head">
+                    <h3>Page Details</h3>
+                    <span class="gs-doc-side-dot"></span>
+                </div>
+                <div class="gs-doc-detail-list">
+                    <div class="gs-doc-detail-row">
+                        <span>Slug</span>
+                        <strong>{{ page.slug }}</strong>
+                    </div>
+                    <div class="gs-doc-detail-row">
+                        <span>Created</span>
+                        <strong>{{ page.created_at|date:"M d, Y" }}</strong>
+                    </div>
+                    <div class="gs-doc-detail-row">
+                        <span>Last Updated</span>
+                        <strong>{{ page.updated_at|date:"M d, Y h:i A" }}</strong>
+                    </div>
+                    <div class="gs-doc-detail-row">
+                        <span>Status</span>
+                        <strong>{% if page.is_active %}Published{% else %}Draft{% endif %}</strong>
+                    </div>
+                </div>
+            </section>
+        </aside>
+    </section>
+</div>

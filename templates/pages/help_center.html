@@ -1,0 +1,170 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block title %}{{ page.title|default:"Help Center" }} | GateSphere{% endblock %}
+{% block body_class %}no-sidebar{% endblock %}
+{% block extra_css %}{% include "pages/_support_page_styles.html" %}{% endblock %}
+{% block content %}
+<div class="gs-special-page" data-live-page="help_center" data-live-url="{% url 'pages:page_live_data' 'help_center' %}">
+    <section class="gs-special-hero">
+        <div class="gs-special-hero-copy">
+            <div class="gs-special-eyebrow">
+                <span class="gs-special-icon gs-special-tone-{{ page_meta.accent|default:'info' }}">
+                    <i class="bi {{ page_meta.icon|default:'bi-life-preserver' }}"></i>
+                </span>
+                <span>{{ page_meta.eyebrow|default:"Support Hub" }}</span>
+            </div>
+            <h1 class="gs-special-title">{{ page.title|default:"Help Center" }}</h1>
+            <p class="gs-special-subtitle">{{ page_meta.subtitle }}</p>
+            <div class="gs-special-actions">
+                <a href="{% url 'pages:contact' %}" class="gs-special-btn gs-special-btn-primary">
+                    <i class="bi bi-send"></i>Contact Support
+                </a>
+                <a href="#help-topics" class="gs-special-btn">
+                    <i class="bi bi-search"></i>Browse Topics
+                </a>
+            </div>
+        </div>
+        <div class="gs-special-hero-side">
+            {% for stat in hero_stats %}
+            <div class="gs-special-stat">
+                <span class="gs-special-stat-label">{{ stat.label }}</span>
+                <strong class="gs-special-stat-value" data-live-stat="{{ stat.label|slugify }}">{{ stat.value }}</strong>
+                <span class="gs-special-stat-help">{{ stat.help }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <div class="gs-special-layout">
+        <div class="gs-special-main gs-special-stack">
+            <section class="gs-special-card" id="help-topics">
+                <div class="gs-special-card-head">
+                    <div>
+                        <p class="gs-special-card-kicker">Smart Search</p>
+                        <h2 class="gs-special-card-title">Find the right answer fast</h2>
+                    </div>
+                    <span class="gs-special-badge gs-special-tone-info" data-help-result-count>{{ help_topics|length }} topics</span>
+                </div>
+                <div class="gs-special-card-body">
+                    <div class="gs-special-search">
+                        <i class="bi bi-search"></i>
+                        <input type="search" placeholder="Search by workflow, status, role, or task" data-help-search>
+                    </div>
+                    <div class="gs-special-grid gs-special-grid-2" style="margin-top:16px;" data-help-topics>
+                        {% for topic in help_topics %}
+                        <article class="gs-special-topic" data-help-topic data-topic-search="{{ topic.title|lower }} {{ topic.category|lower }} {{ topic.summary|lower }} {{ topic.keyword_blob|lower }}">
+                            <div class="gs-special-topic-head">
+                                <span class="gs-special-icon gs-special-tone-{{ topic.tone }}">
+                                    <i class="bi {{ topic.icon }}"></i>
+                                </span>
+                                <div class="gs-special-topic-copy">
+                                    <h3>{{ topic.title }}</h3>
+                                    <p class="mb-0">{{ topic.category }}</p>
+                                </div>
+                            </div>
+                            <p class="gs-special-muted mb-0">{{ topic.summary }}</p>
+                            <div class="gs-special-inline">
+                                <span class="gs-special-pill gs-special-tone-{{ topic.tone }}">{{ topic.category }}</span>
+                                <a href="{{ topic.href }}" class="gs-special-link">
+                                    Open <i class="bi bi-arrow-up-right"></i>
+                                </a>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    </div>
+                    <div class="gs-special-footer-note" data-help-empty hidden>No matching topics yet. Try a broader keyword like "visitor", "check in", or "approval".</div>
+                </div>
+            </section>
+
+            <section class="gs-special-card">
+                <div class="gs-special-card-head">
+                    <div>
+                        <p class="gs-special-card-kicker">Live Content</p>
+                        <h2 class="gs-special-card-title">Support guidance</h2>
+                    </div>
+                    <span class="gs-special-badge gs-special-tone-success">Dynamic</span>
+                </div>
+                <div class="gs-special-card-body">
+                    <div class="gs-special-richtext">{{ rendered_page_content }}</div>
+                </div>
+            </section>
+        </div>
+
+        <aside class="gs-special-aside gs-special-stack">
+            <section class="gs-special-card">
+                <div class="gs-special-card-head">
+                    <div>
+                        <p class="gs-special-card-kicker">Popular Areas</p>
+                        <h2 class="gs-special-card-title">Categories</h2>
+                    </div>
+                </div>
+                <div class="gs-special-card-body">
+                    <div class="gs-special-list">
+                        {% for category in topic_categories %}
+                        <div class="gs-special-list-item">
+                            <div class="gs-special-service-copy">
+                                <strong>{{ category.name }}</strong>
+                                <small>Active help topics</small>
+                            </div>
+                            <span class="gs-special-pill gs-special-tone-secondary">{{ category.count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="gs-special-card">
+                <div class="gs-special-card-head">
+                    <div>
+                        <p class="gs-special-card-kicker">Support Queue</p>
+                        <h2 class="gs-special-card-title">Realtime summary</h2>
+                    </div>
+                </div>
+                <div class="gs-special-card-body">
+                    <div class="gs-special-meta-list">
+                        <div class="gs-special-meta-row">
+                            <span>Open Requests</span>
+                            <strong data-live-open-requests>{{ support_summary.open_requests }}</strong>
+                        </div>
+                        <div class="gs-special-meta-row">
+                            <span>Messages Today</span>
+                            <strong data-live-messages-today>{{ support_summary.messages_today }}</strong>
+                        </div>
+                        <div class="gs-special-meta-row">
+                            <span>Response Target</span>
+                            <strong>{{ support_summary.response_time }}</strong>
+                        </div>
+                        <div class="gs-special-meta-row">
+                            <span>Last Activity</span>
+                            <strong data-live-last-message>
+                                {% if support_summary.last_message_at %}{{ support_summary.last_message_at|timesince }} ago{% else %}No messages yet{% endif %}
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="gs-special-card">
+                <div class="gs-special-card-head">
+                    <div>
+                        <p class="gs-special-card-kicker">Quick Links</p>
+                        <h2 class="gs-special-card-title">Recommended next steps</h2>
+                    </div>
+                </div>
+                <div class="gs-special-card-body gs-special-grid">
+                    {% for topic in highlighted_topics %}
+                    <a href="{{ topic.href }}" class="gs-special-card-link">
+                        <div class="gs-special-inline">
+                            <strong>{{ topic.title }}</strong>
+                            <i class="bi bi-arrow-up-right"></i>
+                        </div>
+                        <span class="gs-special-muted">{{ topic.summary }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </section>
+        </aside>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/pages-special.js' %}?v=1"></script>{% endblock %}

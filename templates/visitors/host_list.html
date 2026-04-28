@@ -1,0 +1,295 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block body_class %}dashboard-layout{% endblock %}
+
+{% block content %}
+<div data-page="host-all">
+    <div class="gs-page-header">
+        <div class="gs-title-row">
+            <div>
+                <h1 class="gs-page-title"><i class="bi bi-people text-primary me-2"></i>All My Visitors</h1>
+                <p class="gs-page-subtitle">Real-time visitor history, status tracking, and host actions</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'create_visitor' %}" class="gs-btn gs-btn-primary"><i class="bi bi-plus-circle"></i>New Visitor</a>
+                <a href="{% url 'host_dashboard' %}" class="gs-btn gs-btn-secondary"><i class="bi bi-arrow-left"></i>Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="gs-grid-4">
+        <div class="gs-card gs-stat-card">
+            <div>
+                <div class="gs-stat-label">Total Visitors</div>
+                <div id="host-all-stat-total" class="gs-stat-value">{{ total_count }}</div>
+            </div>
+            <span class="gs-stat-icon gs-icon-blue"><i class="bi bi-people-fill"></i></span>
+        </div>
+        <div class="gs-card gs-stat-card">
+            <div>
+                <div class="gs-stat-label">Pending</div>
+                <div id="host-all-stat-pending" class="gs-stat-value">{{ pending_count }}</div>
+            </div>
+            <span class="gs-stat-icon gs-icon-yellow"><i class="bi bi-hourglass-split"></i></span>
+        </div>
+        <div class="gs-card gs-stat-card">
+            <div>
+                <div class="gs-stat-label">Approved / Live</div>
+                <div class="d-flex gap-3 align-items-end">
+                    <div id="host-all-stat-approved" class="gs-stat-value">{{ approved_count }}</div>
+                    <div class="mini-inline-stat"><span id="host-all-stat-live">{{ checked_in_count }}</span> live</div>
+                </div>
+            </div>
+            <span class="gs-stat-icon gs-icon-green"><i class="bi bi-check2-circle"></i></span>
+        </div>
+        <div class="gs-card gs-stat-card">
+            <div>
+                <div class="gs-stat-label">Closed Visits</div>
+                <div id="host-all-stat-closed" class="gs-stat-value">{{ checked_out_count }}</div>
+            </div>
+            <span class="gs-stat-icon gs-icon-cyan"><i class="bi bi-box-arrow-right"></i></span>
+        </div>
+    </div>
+
+    <div class="gs-table-card">
+        <div class="gs-panel-head host-all-toolbar">
+            <div class="gs-card-title">
+                <i class="bi bi-list-columns-reverse text-primary"></i>
+                <span>Visitor Register</span>
+                <span id="host-all-badge" class="count-badge">{{ total_count }}</span>
+            </div>
+            <div class="host-all-toolbar-actions">
+                <div class="search-wrap">
+                    <i class="bi bi-search"></i>
+                    <input type="search" class="dashboard-search" data-target="#host-all-table" placeholder="Search by name, phone, purpose, company or status">
+                </div>
+                <div class="filter-pills">
+                    <button class="filter-pill active" type="button" data-target="#host-all-table" data-filter="all">All</button>
+                    <button class="filter-pill" type="button" data-target="#host-all-table" data-filter="PENDING">Pending</button>
+                    <button class="filter-pill" type="button" data-target="#host-all-table" data-filter="APPROVED">Approved</button>
+                    <button class="filter-pill" type="button" data-target="#host-all-table" data-filter="CHECKED_IN">Checked In</button>
+                    <button class="filter-pill" type="button" data-target="#host-all-table" data-filter="CHECKED_OUT">Checked Out</button>
+                    <button class="filter-pill" type="button" data-target="#host-all-table" data-filter="REJECTED">Rejected</button>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table" id="host-all-table">
+                <thead>
+                    <tr>
+                        <th>Visitor</th>
+                        <th>Contact</th>
+                        <th>Purpose</th>
+                        <th>Status</th>
+                        <th>Expected Visit</th>
+                        <th>Latest Activity</th>
+                        <th class="text-end">Action State</th>
+                    </tr>
+                </thead>
+                <tbody id="host-all-body">
+                    {% for visitor in visitors %}
+                    <tr id="host-all-row-{{ visitor.id }}" data-status="{{ visitor.status }}"
+                        data-search="{{ visitor.full_name|lower }} {{ visitor.contact_number|lower }} {{ visitor.email|default:''|lower }} {{ visitor.purpose|lower }} {{ visitor.status|lower }} {{ visitor.company_name|default:''|lower }} {{ visitor.host.username|lower }}">
+                        <td>
+                            <div class="table-meta">
+                                <span class="table-avatar bg-primary-subtle text-primary">{{ visitor.full_name|first|upper }}</span>
+                                <div class="table-meta-copy">
+                                    <strong>{{ visitor.full_name }}</strong>
+                                    <small>{{ visitor.email|default:"No email provided" }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ visitor.contact_number }}</td>
+                        <td>{{ visitor.purpose|truncatechars:60 }}</td>
+                        <td>
+                            <span class="gs-status-pill
+                                {% if visitor.status == 'PENDING' %}gs-status-pending{% elif visitor.status == 'APPROVED' %}gs-status-approved{% elif visitor.status == 'REJECTED' %}gs-status-rejected{% elif visitor.status == 'CHECKED_IN' %}gs-status-security{% else %}gs-status-host{% endif %}">
+                                {{ visitor.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <strong>{{ visitor.expected_date|date:"M d, Y"|default:"Not scheduled" }}</strong>
+                            <small class="d-block text-muted">{{ visitor.expected_time|time:"H:i"|default:"Any time" }}</small>
+                        </td>
+                        <td>
+                            {% if visitor.visit_log.check_in_time %}
+                            {{ visitor.visit_log.check_in_time|date:"M d, Y h:i A" }}
+                            {% elif visitor.approval_time %}
+                            {{ visitor.approval_time|date:"M d, Y h:i A" }}
+                            {% else %}
+                            {{ visitor.created_at|date:"M d, Y h:i A" }}
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            {% if visitor.status == 'PENDING' %}
+                            <button class="btn btn-sm btn-success me-2" data-visitor-action="approve" data-id="{{ visitor.id }}">
+                                <i class="bi bi-check-lg me-1"></i>Approve
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" data-visitor-action="reject" data-id="{{ visitor.id }}">
+                                <i class="bi bi-x-lg me-1"></i>Reject
+                            </button>
+                            {% elif visitor.status == 'APPROVED' %}
+                            <span class="text-success fw-semibold"><i class="bi bi-check-circle me-1"></i>Approved</span>
+                            {% elif visitor.status == 'CHECKED_IN' %}
+                            <span class="text-info fw-semibold"><i class="bi bi-person-check me-1"></i>In progress</span>
+                            {% elif visitor.status == 'CHECKED_OUT' %}
+                            <span class="text-muted fw-semibold"><i class="bi bi-box-arrow-right me-1"></i>Completed</span>
+                            {% else %}
+                            <span class="text-danger fw-semibold"><i class="bi bi-x-circle me-1"></i>Rejected</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox fs-3 d-block mb-2"></i>No visitor records found for this host.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard-role.js' %}?v=16"></script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .host-all-toolbar,
+    .host-all-toolbar-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .table-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+    }
+
+    .table-meta-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+
+    .table-meta-copy small,
+    .mini-inline-stat {
+        color: #6b7280;
+        font-weight: 600;
+    }
+
+    .mini-inline-stat {
+        padding-bottom: 0.35rem;
+    }
+
+    .filter-pills {
+        align-items: center;
+    }
+
+    .filter-pill {
+        border-width: 1px !important;
+        font-weight: 700 !important;
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+    }
+
+    .filter-pill[data-filter="all"] {
+        border-color: #94a3b8;
+        color: #334155;
+        background: #f8fafc;
+    }
+
+    .filter-pill[data-filter="PENDING"] {
+        border-color: #f59e0b;
+        color: #b45309;
+        background: #fff7ed;
+    }
+
+    .filter-pill[data-filter="APPROVED"] {
+        border-color: #0ea5a4;
+        color: #0f766e;
+        background: #ecfeff;
+    }
+
+    .filter-pill[data-filter="CHECKED_IN"] {
+        border-color: #3b82f6;
+        color: #1d4ed8;
+        background: #eff6ff;
+    }
+
+    .filter-pill[data-filter="CHECKED_OUT"] {
+        border-color: #8b5cf6;
+        color: #6d28d9;
+        background: #f5f3ff;
+    }
+
+    .filter-pill[data-filter="REJECTED"] {
+        border-color: #f97316;
+        color: #c2410c;
+        background: #fff7ed;
+    }
+
+    .filter-pill:hover,
+    .filter-pill.active {
+        transform: translateY(-1px);
+        color: #0f172a !important;
+        background: #e2e8f0 !important;
+        border-color: #64748b !important;
+    }
+
+    #host-all-table .btn-success {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 55%, #15803d 100%) !important;
+        border-color: #16a34a !important;
+        color: #fff !important;
+        box-shadow: 0 12px 24px rgba(22, 163, 74, 0.24) !important;
+    }
+
+    #host-all-table .btn-success:hover,
+    #host-all-table .btn-success:focus {
+        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+        border-color: #15803d !important;
+        color: #fff !important;
+    }
+
+    #host-all-table .btn-outline-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 55%, #b91c1c 100%) !important;
+        border-color: #dc2626 !important;
+        color: #fff !important;
+        box-shadow: 0 12px 24px rgba(220, 38, 38, 0.22) !important;
+    }
+
+    #host-all-table .btn-outline-danger:hover,
+    #host-all-table .btn-outline-danger:focus {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+        border-color: #b91c1c !important;
+        color: #fff !important;
+    }
+
+    @media (max-width: 768px) {
+        .host-all-toolbar-actions {
+            width: 100%;
+        }
+
+        .search-wrap {
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .dashboard-search {
+            width: 100%;
+        }
+
+        .filter-pills {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}

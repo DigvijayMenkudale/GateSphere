@@ -1,0 +1,146 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block body_class %}dashboard-layout{% endblock %}
+
+{% block content %}
+<div class="gs-page-header">
+    <div class="gs-title-row">
+        <div>
+            <h1 class="gs-page-title"><i class="bi bi-box-arrow-in-right text-primary me-2"></i>Admin Check-In Panel</h1>
+            <p class="gs-page-subtitle">Advanced visitor check-in and check-out management</p>
+        </div>
+        <div class="gs-date-pill"><i class="bi bi-calendar3 me-1"></i>{% now "F d, Y" %}</div>
+    </div>
+</div>
+
+<div class="gs-grid-4">
+    <div class="gs-card gs-stat-card">
+        <div>
+            <div class="gs-stat-label">Ready for Check-In</div>
+            <div id="stat-approved-visitors" class="gs-stat-value">{{ approved_count }}</div>
+        </div>
+        <span class="gs-stat-icon gs-icon-green"><i class="bi bi-box-arrow-in-right"></i></span>
+    </div>
+    <div class="gs-card gs-stat-card">
+        <div>
+            <div class="gs-stat-label">Currently Checked In</div>
+            <div id="stat-checked-in" class="gs-stat-value">{{ checked_in_count }}</div>
+        </div>
+        <span class="gs-stat-icon gs-icon-cyan"><i class="bi bi-person-check"></i></span>
+    </div>
+    <div class="gs-card gs-stat-card">
+        <div>
+            <div class="gs-stat-label">Checked Out Today</div>
+            <div id="stat-checked-out-today" class="gs-stat-value">{{ checked_out_today }}</div>
+        </div>
+        <span class="gs-stat-icon gs-icon-gray"><i class="bi bi-box-arrow-right"></i></span>
+    </div>
+    <div class="gs-card gs-stat-card">
+        <div>
+            <div class="gs-stat-label">Today's Visitors</div>
+            <div id="stat-today-visitors" class="gs-stat-value">{{ today_visitors }}</div>
+        </div>
+        <span class="gs-stat-icon gs-icon-blue"><i class="bi bi-people-fill"></i></span>
+    </div>
+</div>
+
+<div class="gs-table-card" style="margin-bottom: 14px;">
+    <div class="gs-panel-head">
+        <div class="gs-card-title">
+            <i class="bi bi-check-circle text-success"></i>
+            <span>Ready for Check-In</span>
+            <span id="badge-approved-count" class="count-badge">{{ approved_count }}</span>
+        </div>
+    </div>
+    {% if approved_visitors %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Visitor Name</th>
+                    <th>Contact</th>
+                    <th>Purpose</th>
+                    <th>Host</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="table-approved-body">
+                {% for visitor in approved_visitors %}
+                <tr id="visitor-row-approved-{{ visitor.id }}" data-status="APPROVED"
+                    data-search="{{ visitor.full_name|lower }} {{ visitor.contact_number|lower }} {{ visitor.purpose|lower }} {{ visitor.host.username|lower }}">
+                    <td>{{ visitor.full_name }}</td>
+                    <td>{{ visitor.contact_number }}</td>
+                    <td>{{ visitor.purpose|truncatechars:40 }}</td>
+                    <td>{{ visitor.host.username }}</td>
+                    <td><span class="gs-status-pill gs-status-approved">Approved</span></td>
+                    <td>
+                        <button class="gs-btn gs-btn-green-fill" data-visitor-action="checkin" data-id="{{ visitor.id }}">
+                            <i class="bi bi-box-arrow-in-right"></i>Check In
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="gs-empty-state">
+        <i class="bi bi-box-arrow-in-right"></i>
+        <p>No visitors waiting for check-in</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="gs-table-card">
+    <div class="gs-panel-head">
+        <div class="gs-card-title">
+            <i class="bi bi-person-check text-info"></i>
+            <span>Currently Checked In</span>
+            <span id="badge-checked-in-count" class="count-badge info">{{ checked_in_count }}</span>
+        </div>
+    </div>
+    {% if checked_in_visitors %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Visitor Name</th>
+                    <th>Contact</th>
+                    <th>Purpose</th>
+                    <th>Host</th>
+                    <th>Check-In Time</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="table-checkedin-body">
+                {% for visitor in checked_in_visitors %}
+                <tr id="visitor-row-checkout-{{ visitor.id }}" data-status="CHECKED_IN"
+                    data-search="{{ visitor.full_name|lower }} {{ visitor.contact_number|lower }} {{ visitor.purpose|lower }} {{ visitor.host.username|lower }}">
+                    <td>{{ visitor.full_name }}</td>
+                    <td>{{ visitor.contact_number }}</td>
+                    <td>{{ visitor.purpose|truncatechars:40 }}</td>
+                    <td>{{ visitor.host.username }}</td>
+                    <td>{% if visitor.visit_log.check_in_time %}{{ visitor.visit_log.check_in_time|date:"M d, Y h:i A" }}{% else %}Pending sync{% endif %}</td>
+                    <td>
+                        <button class="gs-btn gs-btn-orange-fill" data-visitor-action="checkout" data-id="{{ visitor.id }}">
+                            <i class="bi bi-box-arrow-left"></i>Check Out
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="gs-empty-state">
+        <i class="bi bi-person-check"></i>
+        <p>No visitors currently checked in</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard-role.js' %}?v=15"></script>
+{% endblock %}

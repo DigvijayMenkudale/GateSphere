@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}GateSphere{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Inter Font -->
+    <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
+    <link rel="shortcut icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
+    <meta name="theme-color" content="#007bff">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        /* Critical no-blink styles - INSTANT stable render */
+        :root {
+            --auth-bg: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+
+        * {
+            animation: none !important;
+            transform: none !important;
+        }
+
+        html,
+        body {
+            height: 100vh;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body.auth-page {
+            background: var(--auth-bg);
+            animation: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .auth-page .container-fluid,
+        .auth-page .login-wrapper,
+        .auth-page .login-container,
+        .auth-page .login-card {
+            animation: none !important;
+            transform: none !important;
+            opacity: 1 !important;
+            backdrop-filter: none !important;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.98) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        }
+
+        /* Prevent any hover/focus interference during load */
+        .auth-page *:hover,
+        .auth-page *:focus {
+            transition: none !important;
+        }
+
+        /* Stabilize after 0.1s */
+        body.stable * {
+            transition: all 0.3s ease !important;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="{% block body_class %}no-sidebar auth-page{% endblock %}">
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
+
+    {% block content %}{% endblock %}
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script src="{% static 'js/auth.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

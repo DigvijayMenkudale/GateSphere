@@ -1,0 +1,318 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block body_class %}dashboard-layout{% endblock %}
+
+{% block content %}
+<div data-dashboard-role="security">
+    <div class="gs-page-header">
+        <div class="gs-title-row">
+            <div>
+                <h1 class="gs-page-title"><i class="bi bi-shield-check text-primary me-2"></i>Security Dashboard</h1>
+                <p class="gs-page-subtitle">Live gate operations, check-in queue, and on-site visitor tracking</p>
+            </div>
+            <div class="security-header-actions">
+                <span class="gs-date-pill"><i class="bi bi-calendar3 me-1"></i>{% now "F d, Y" %}</span>
+                <span class="gs-date-pill"><i class="bi bi-broadcast-pin me-1"></i>Live refresh every 15s</span>
+                <a href="{% url 'security_visitors' %}" class="security-link-btn"><i class="bi bi-people"></i>All Visitors</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="gs-grid-4">
+        <div class="gs-card gs-stat-card">
+            <div>
+                <div class="gs-stat-label">Ready for Check-In</div>
+                <div id="security-stat-approved" class="gs-stat-value">{{ approved_count }}</div>
+            </div>
+            <span class="gs-stat-icon gs-icon-green"><i class="bi bi-box-arrow-in-right"></i></span>
+        </div>
+        <div class="gs-card gs-stat-card">
+            <div>
+                <div class="gs-stat-label">Currently Checked In</div>
+                <div id="security-stat-checkedin" class="gs-stat-value">{{ checked_in_count }}</div>
+            </div>
+            <span class="gs-stat-icon gs-icon-cyan"><i class="bi bi-person-check"></i></span>
+        </div>
+        <div class="gs-card gs-stat-card">
+            <div>
+                <div class="gs-stat-label">Checked Out Today</div>
+                <div id="security-stat-checkedout" class="gs-stat-value">{{ checked_out_today }}</div>
+            </div>
+            <span class="gs-stat-icon gs-icon-gray"><i class="bi bi-box-arrow-right"></i></span>
+        </div>
+        <div class="gs-card gs-stat-card">
+            <div>
+                <div class="gs-stat-label">Today's Visitors</div>
+                <div id="security-stat-today" class="gs-stat-value">{{ today_visitors }}</div>
+            </div>
+            <span class="gs-stat-icon gs-icon-blue"><i class="bi bi-people-fill"></i></span>
+        </div>
+    </div>
+
+    <div class="gs-table-card" style="margin-bottom: 14px;">
+        <div class="gs-panel-head card-toolbar">
+            <div class="gs-card-title">
+                <i class="bi bi-check-circle text-success"></i>
+                <span>Check-In Panel</span>
+                <span id="security-approved-badge" class="count-badge">{{ approved_count }}</span>
+            </div>
+            <div class="toolbar-actions">
+                <div class="search-wrap">
+                    <i class="bi bi-search"></i>
+                    <input type="search" class="dashboard-search" data-target="#security-approved-table" placeholder="Search approved visitors by name, phone, purpose or host">
+                </div>
+                <div class="filter-pills">
+                    <button class="filter-pill active" type="button" data-target="#security-approved-table" data-filter="all">All Ready</button>
+                    <button class="filter-pill" type="button" data-target="#security-approved-table" data-filter="APPROVED">Approved</button>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table" id="security-approved-table">
+                <thead>
+                    <tr>
+                        <th>Visitor</th>
+                        <th>Contact</th>
+                        <th>Purpose</th>
+                        <th>Host</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="security-approved-body">
+                    {% for visitor in approved_visitors %}
+                    <tr id="visitor-row-approved-{{ visitor.id }}" data-status="APPROVED"
+                        data-search="{{ visitor.full_name|lower }} {{ visitor.contact_number|lower }} {{ visitor.purpose|lower }} {{ visitor.host.username|lower }}">
+                        <td>
+                            <div class="table-meta">
+                                <span class="table-avatar bg-success-subtle text-success">{{ visitor.full_name|first|upper }}</span>
+                                <div class="table-meta-copy">
+                                    <strong>{{ visitor.full_name }}</strong>
+                                    <small>Ready at gate</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ visitor.contact_number }}</td>
+                        <td>{{ visitor.purpose|truncatechars:45 }}</td>
+                        <td>{{ visitor.host.username }}</td>
+                        <td><span class="gs-status-pill gs-status-approved">Approved</span></td>
+                        <td class="text-end">
+                            <button class="security-action-btn security-action-checkin" data-visitor-action="checkin" data-id="{{ visitor.id }}">
+                                <i class="bi bi-box-arrow-in-right"></i><span>Check In</span>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox fs-3 d-block mb-2"></i>No visitors waiting for check-in.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="gs-table-card">
+        <div class="gs-panel-head card-toolbar">
+            <div class="gs-card-title">
+                <i class="bi bi-person-check text-info"></i>
+                <span>Currently Checked In</span>
+                <span id="security-checkedin-badge" class="count-badge info">{{ checked_in_count }}</span>
+            </div>
+            <div class="toolbar-actions">
+                <div class="search-wrap">
+                    <i class="bi bi-search"></i>
+                    <input type="search" class="dashboard-search" data-target="#security-live-table" placeholder="Search active visitors by name, phone, purpose or host">
+                </div>
+                <div class="filter-pills">
+                    <button class="filter-pill active" type="button" data-target="#security-live-table" data-filter="all">All Live</button>
+                    <button class="filter-pill" type="button" data-target="#security-live-table" data-filter="CHECKED_IN">Checked In</button>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table" id="security-live-table">
+                <thead>
+                    <tr>
+                        <th>Visitor</th>
+                        <th>Contact</th>
+                        <th>Purpose</th>
+                        <th>Host</th>
+                        <th>Check-In Time</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="security-live-body">
+                    {% for visitor in checked_in_visitors %}
+                    <tr id="visitor-row-checkout-{{ visitor.id }}" data-status="CHECKED_IN"
+                        data-search="{{ visitor.full_name|lower }} {{ visitor.contact_number|lower }} {{ visitor.purpose|lower }} {{ visitor.host.username|lower }}">
+                        <td>
+                            <div class="table-meta">
+                                <span class="table-avatar bg-info-subtle text-info">{{ visitor.full_name|first|upper }}</span>
+                                <div class="table-meta-copy">
+                                    <strong>{{ visitor.full_name }}</strong>
+                                    <small>On site now</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ visitor.contact_number }}</td>
+                        <td>{{ visitor.purpose|truncatechars:45 }}</td>
+                        <td>{{ visitor.host.username }}</td>
+                        <td>{% if visitor.visit_log.check_in_time %}{{ visitor.visit_log.check_in_time|date:"M d, Y h:i A" }}{% else %}Pending sync{% endif %}</td>
+                        <td class="text-end">
+                            <button class="security-action-btn security-action-checkout" data-visitor-action="checkout" data-id="{{ visitor.id }}">
+                                <i class="bi bi-box-arrow-left"></i><span>Check Out</span>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox fs-3 d-block mb-2"></i>No visitors currently checked in.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .security-header-actions,
+    .card-toolbar,
+    .toolbar-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.9rem;
+        flex-wrap: wrap;
+    }
+
+    .security-link-btn,
+    .security-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-weight: 700;
+        border-radius: 10px;
+        text-decoration: none;
+        transition: 0.2s ease;
+    }
+
+    .security-link-btn {
+        padding: 0.72rem 1rem;
+        border: 1px solid #d4defd;
+        background: #eff4ff;
+        color: #1d4ed8;
+    }
+
+    .security-link-btn:hover {
+        background: #1d4ed8;
+        color: #fff;
+    }
+
+    .security-action-btn {
+        padding: 0.58rem 0.85rem;
+        border: 1px solid transparent;
+    }
+
+    .security-action-checkin {
+        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+        color: #fff;
+        box-shadow: 0 10px 18px rgba(22, 163, 74, 0.18);
+    }
+
+    .security-action-checkout {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: #fff;
+        box-shadow: 0 10px 18px rgba(217, 119, 6, 0.18);
+    }
+
+    .security-action-checkin:hover,
+    .security-action-checkout:hover {
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .table-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+    }
+
+    .table-meta-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+
+    .table-meta-copy small {
+        color: #6b7280;
+    }
+
+    .filter-pills {
+        align-items: center;
+    }
+
+    .filter-pill {
+        border-width: 1px !important;
+        font-weight: 700 !important;
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+    }
+
+    .filter-pill[data-filter="all"] {
+        border-color: #94a3b8;
+        color: #334155;
+        background: #f8fafc;
+    }
+
+    .filter-pill[data-filter="APPROVED"] {
+        border-color: #8b5cf6;
+        color: #6d28d9;
+        background: #f5f3ff;
+    }
+
+    .filter-pill[data-filter="CHECKED_IN"] {
+        border-color: #0ea5e9;
+        color: #0369a1;
+        background: #eff6ff;
+    }
+
+    .filter-pill:hover,
+    .filter-pill.active {
+        transform: translateY(-1px);
+        color: #0f172a !important;
+        background: #e2e8f0 !important;
+        border-color: #64748b !important;
+    }
+
+    @media (max-width: 768px) {
+        .security-header-actions,
+        .toolbar-actions {
+            width: 100%;
+        }
+
+        .search-wrap {
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .dashboard-search {
+            width: 100%;
+        }
+
+        .filter-pills {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard-role.js' %}?v=17"></script>
+{% endblock %}

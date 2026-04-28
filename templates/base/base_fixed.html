@@ -1,0 +1,142 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>GateSphere</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{% csrf_token %}">
+
+    <!-- Bootstrap CSS (cache-busted single load) -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}?v=5.3">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=3">
+
+    <!-- CLEAN Auth page fixes ONLY -->
+    <style>
+        /* Navbar & layout */
+        body.auth-page .navbar,
+        [data-auth-hide] {
+            display: none !important;
+        }
+
+        body.auth-page {
+            padding-top: 0 !important;
+            background: #f8f9fa !important;
+        }
+
+        .auth-page .container-fluid {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        /* Bulletproof form-floating */
+        .auth-page .form-floating {
+            position: relative !important;
+            margin-bottom: 2rem !important;
+        }
+
+        .auth-page .form-floating>label {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            padding: 1.2rem 1.3rem !important;
+            pointer-events: none !important;
+            transform-origin: 0 0 !important;
+            transition: all 0.25s ease !important;
+        }
+
+        .auth-page .form-floating>.form-control,
+        .auth-page .form-floating>.form-select {
+            padding: 1.2rem 3rem 0.7rem 1.3rem !important;
+            height: 3.8rem !important;
+            border: 2px solid #e9ecef !important;
+            border-radius: 12px !important;
+        }
+
+        .auth-page .form-floating>.form-control:focus~label,
+        .auth-page .form-floating>.form-control:not(:placeholder-shown)~label,
+        .auth-page .form-floating>.form-select:focus~label {
+            transform: scale(0.85) translateY(-1.1rem) !important;
+            color: #4cc9f0 !important;
+        }
+
+        /* Icons fallback */
+        .bi::before {
+            display: inline-block !important;
+            font-size: inherit;
+        }
+
+        .bi-person::before {
+            content: "👤" !important;
+        }
+
+        .bi-shield-check::before {
+            content: "🛡️" !important;
+        }
+
+        .bi-chevron-down::before {
+            content: "▼" !important;
+        }
+
+        .bi-box-arrow-right::before {
+            content: "↗" !important;
+        }
+
+        .bi-check-lg::before {
+            content: "✓" !important;
+        }
+
+        .bi-key::before,
+        .bi-lock::before {
+            content: "🔒" !important;
+        }
+    </style>
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg bg-primary shadow-sm" data-auth-hide>
+        <div class="container-fluid px-4">
+            <a class="navbar-brand fw-bold text-white" href="/">
+                <span class="bi-shield-check"></span>GateSphere
+            </a>
+            <div class="ms-auto">
+                {% if user.is_authenticated %}
+                <div class="dropdown">
+                    <a class="dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                        {{ user.username }} <span class="bi-chevron-down"></span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/profile/"><span class="bi-person"></span> Profile</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item text-danger" href="/logout/"><span
+                                    class="bi-box-arrow-right"></span> Logout</a></li>
+                    </ul>
+                </div>
+                {% else %}
+                <a href="/login/" class="btn btn-outline-light btn-sm">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Scripts -->
+    <script src="{% static 'admin/js/jquery.init.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script src="{% static 'js/main.js' %}?v=2"></script>
+</body>
+
+</html>

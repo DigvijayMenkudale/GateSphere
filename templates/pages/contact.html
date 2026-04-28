@@ -1,0 +1,159 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block title %}Contact Us | GateSphere{% endblock %}
+{% block body_class %}no-sidebar{% endblock %}
+{% block extra_css %}{% include "pages/_support_page_styles.html" %}{% endblock %}
+{% block content %}
+<div class="gs-special-page" data-live-page="contact" data-live-url="{% url 'pages:page_live_data' 'contact' %}">
+    <section class="gs-special-hero">
+        <div class="gs-special-hero-copy">
+            <div class="gs-special-eyebrow">
+                <span class="gs-special-icon gs-special-tone-success">
+                    <i class="bi bi-chat-dots"></i>
+                </span>
+                <span>Contact Support</span>
+            </div>
+            <h1 class="gs-special-title">Contact Us</h1>
+            <p class="gs-special-subtitle">Reach the GateSphere team with a clean, responsive form plus live queue visibility so users know what to expect before they submit.</p>
+            <div class="gs-special-actions">
+                <a href="#contact-form" class="gs-special-btn gs-special-btn-primary">
+                    <i class="bi bi-envelope-paper"></i>Send a Message
+                </a>
+                <a href="{% url 'pages:help_center' %}" class="gs-special-btn">
+                    <i class="bi bi-life-preserver"></i>Open Help Center
+                </a>
+            </div>
+        </div>
+        <div class="gs-special-hero-side">
+            {% for metric in contact_metrics %}
+            <div class="gs-special-stat">
+                <span class="gs-special-stat-label">{{ metric.label }}</span>
+                <strong class="gs-special-stat-value" data-contact-metric="{{ metric.label|slugify }}">{{ metric.value }}</strong>
+                <span class="gs-special-stat-help">Live support and operations data</span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <div class="gs-special-layout">
+        <div class="gs-special-main">
+            <section class="gs-special-card" id="contact-form">
+                <div class="gs-special-card-head">
+                    <div>
+                        <p class="gs-special-card-kicker">Message Form</p>
+                        <h2 class="gs-special-card-title">Tell us what you need</h2>
+                    </div>
+                    <span class="gs-special-badge gs-special-tone-primary">Working UI</span>
+                </div>
+                <div class="gs-special-card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                        <div class="gs-special-alert {% if message.tags == 'success' %}gs-special-alert-success{% else %}gs-special-alert-danger{% endif %}" style="margin-bottom:16px;">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                    <form method="post" class="gs-special-form" data-contact-form>
+                        {% csrf_token %}
+                        {% if form.non_field_errors %}
+                        <div class="gs-special-alert gs-special-alert-danger">{{ form.non_field_errors }}</div>
+                        {% endif %}
+                        <div class="gs-special-form-grid">
+                            <div class="gs-special-field">
+                                <label for="{{ form.name.id_for_label }}">Full Name</label>
+                                {{ form.name }}
+                                {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors|striptags }}</div>{% endif %}
+                            </div>
+                            <div class="gs-special-field">
+                                <label for="{{ form.email.id_for_label }}">Email</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors|striptags }}</div>{% endif %}
+                            </div>
+                        </div>
+                        <div class="gs-special-field">
+                            <label for="{{ form.subject.id_for_label }}">Subject</label>
+                            {{ form.subject }}
+                            {% if form.subject.errors %}<div class="text-danger small">{{ form.subject.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="gs-special-field">
+                            <div class="gs-special-inline">
+                                <label for="{{ form.message.id_for_label }}">Message</label>
+                                <span class="gs-special-helper"><span data-message-count>0</span> characters</span>
+                            </div>
+                            {{ form.message }}
+                            {% if form.message.errors %}<div class="text-danger small">{{ form.message.errors|striptags }}</div>{% endif %}
+                            <div class="gs-special-helper">Include visitor name, workflow step, and the issue you are seeing for faster triage.</div>
+                        </div>
+                        <div class="gs-special-field">
+                            <div class="form-check gs-special-consent">
+                                <div class="gs-special-consent-box">
+                                    {{ form.consent }}
+                                </div>
+                                <div class="gs-special-consent-copy">
+                                    <label class="form-check-label" for="{{ form.consent.id_for_label }}">{{ form.consent.label }}</label>
+                                    <div class="gs-special-helper" id="consent-help">Your information is used only to process and respond to your support request.</div>
+                                </div>
+                            </div>
+                            {% if form.consent.errors %}<div class="text-danger small">{{ form.consent.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <button type="submit" class="gs-special-btn gs-special-btn-primary">
+                            <i class="bi bi-send"></i>Send Message
+                        </button>
+                    </form>
+                </div>
+            </section>
+        </div>
+
+        <aside class="gs-special-aside gs-special-stack">
+            <section class="gs-special-card">
+                <div class="gs-special-card-head">
+                    <div>
+                        <p class="gs-special-card-kicker">Channels</p>
+                        <h2 class="gs-special-card-title">Support options</h2>
+                    </div>
+                </div>
+                <div class="gs-special-card-body gs-special-grid">
+                    {% for card in contact_cards %}
+                    <a href="{{ card.href }}" class="gs-special-card-link">
+                        <div class="gs-special-topic-head">
+                            <span class="gs-special-icon gs-special-tone-{{ card.tone }}">
+                                <i class="bi {{ card.icon }}"></i>
+                            </span>
+                            <div class="gs-special-topic-copy">
+                                <h3>{{ card.title }}</h3>
+                                <p class="mb-0">{{ card.value }}</p>
+                            </div>
+                        </div>
+                        <span class="gs-special-muted">{{ card.detail }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="gs-special-card">
+                <div class="gs-special-card-head">
+                    <div>
+                        <p class="gs-special-card-kicker">Realtime Queue</p>
+                        <h2 class="gs-special-card-title">Current support load</h2>
+                    </div>
+                </div>
+                <div class="gs-special-card-body">
+                    <div class="gs-special-meta-list">
+                        {% for metric in contact_metrics %}
+                        <div class="gs-special-meta-row">
+                            <span>{{ metric.label }}</span>
+                            <strong data-contact-side-metric="{{ metric.label|slugify }}">{{ metric.value }}</strong>
+                        </div>
+                        {% endfor %}
+                        <div class="gs-special-meta-row">
+                            <span>Last Incoming Message</span>
+                            <strong data-contact-last-message>{% if last_message_at %}{{ last_message_at|timesince }} ago{% else %}No messages yet{% endif %}</strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </aside>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/pages-special.js' %}?v=1"></script>{% endblock %}

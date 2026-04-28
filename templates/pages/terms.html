@@ -1,0 +1,98 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block title %}{{ page.title|default:"Terms of Service" }} | GateSphere{% endblock %}
+{% block body_class %}no-sidebar{% endblock %}
+{% block extra_css %}{% include "pages/_support_page_styles.html" %}{% endblock %}
+{% block content %}
+<div class="gs-special-page" data-live-page="terms" data-live-url="{% url 'pages:page_live_data' 'terms' %}">
+    <section class="gs-special-hero">
+        <div class="gs-special-hero-copy">
+            <div class="gs-special-eyebrow">
+                <span class="gs-special-icon gs-special-tone-{{ page_meta.accent|default:'warning' }}">
+                    <i class="bi {{ page_meta.icon|default:'bi-file-earmark-text' }}"></i>
+                </span>
+                <span>{{ page_meta.eyebrow|default:"Legal" }}</span>
+            </div>
+            <h1 class="gs-special-title">{{ page.title|default:"Terms of Service" }}</h1>
+            <p class="gs-special-subtitle">{{ page_meta.subtitle }}</p>
+            <div class="gs-special-actions">
+                <a href="#terms-content" class="gs-special-btn gs-special-btn-primary">
+                    <i class="bi bi-journal-text"></i>Read Terms
+                </a>
+                <a href="{% url 'pages:contact' %}" class="gs-special-btn">
+                    <i class="bi bi-chat-left-dots"></i>Ask a Question
+                </a>
+            </div>
+        </div>
+        <div class="gs-special-hero-side">
+            {% for stat in hero_stats %}
+            <div class="gs-special-stat">
+                <span class="gs-special-stat-label">{{ stat.label }}</span>
+                <strong class="gs-special-stat-value" data-terms-hero="{{ stat.label|slugify }}">{{ stat.value }}</strong>
+                <span class="gs-special-stat-help">{{ stat.help }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <div class="gs-special-layout">
+        <div class="gs-special-main gs-special-stack">
+            <section class="gs-special-card" id="terms-content">
+                <div class="gs-special-card-head">
+                    <div>
+                        <p class="gs-special-card-kicker">Document</p>
+                        <h2 class="gs-special-card-title">Current terms</h2>
+                    </div>
+                    <span class="gs-special-badge gs-special-tone-warning">Live page data</span>
+                </div>
+                <div class="gs-special-card-body">
+                    <div class="gs-special-richtext">{{ rendered_page_content }}</div>
+                </div>
+            </section>
+
+            <section class="gs-special-card">
+                <div class="gs-special-card-head">
+                    <div>
+                        <p class="gs-special-card-kicker">Plain-Language Summary</p>
+                        <h2 class="gs-special-card-title">Key responsibilities</h2>
+                    </div>
+                </div>
+                <div class="gs-special-card-body">
+                    <div class="gs-special-grid gs-special-grid-2">
+                        {% for item in terms_highlights %}
+                        <article class="gs-special-topic">
+                            <div class="gs-special-topic-copy">
+                                <h3>{{ item.title }}</h3>
+                                <p class="mb-0">{{ item.detail }}</p>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <aside class="gs-special-aside gs-special-stack">
+            <section class="gs-special-card">
+                <div class="gs-special-card-head">
+                    <div>
+                        <p class="gs-special-card-kicker">Document Metadata</p>
+                        <h2 class="gs-special-card-title">Realtime details</h2>
+                    </div>
+                </div>
+                <div class="gs-special-card-body">
+                    <div class="gs-special-meta-list" data-terms-meta>
+                        {% for row in terms_meta %}
+                        <div class="gs-special-meta-row">
+                            <span>{{ row.label }}</span>
+                            <strong>{{ row.value }}</strong>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+        </aside>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/pages-special.js' %}?v=1"></script>{% endblock %}

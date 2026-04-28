@@ -1,0 +1,434 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block body_class %}dashboard-layout{% endblock %}
+
+{% block content %}
+<div data-page="visitor-create">
+    <div class="gs-page-header">
+        <div class="gs-title-row">
+            <div>
+                <h1 class="gs-page-title"><i class="bi bi-person-plus text-primary me-2"></i>Register Visitor</h1>
+                <p class="gs-page-subtitle">Create a live visitor request with required-field validation and instant review readiness</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'host_dashboard' %}" class="gs-btn gs-btn-secondary"><i class="bi bi-arrow-left"></i>Host Dashboard</a>
+                <a href="{% url 'host_all_visitors' %}" class="gs-btn gs-btn-primary"><i class="bi bi-people"></i>Visitor Register</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="form-live-alerts" class="message-stack"></div>
+
+    {% if messages %}
+    <div class="message-stack">
+        {% for message in messages %}
+        <div class="form-alert form-alert-{{ message.tags|default:'info' }}">
+            <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill{% elif message.tags == 'error' %}bi-exclamation-triangle-fill{% else %}bi-info-circle-fill{% endif %}"></i>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="gs-grid-2">
+        <div class="gs-table-card">
+            <div class="gs-panel-head">
+                <div class="gs-card-title"><i class="bi bi-person-vcard text-primary"></i><span>Visitor Information</span></div>
+            </div>
+            <div class="gs-panel-body">
+                <form method="POST" action="{% url 'create_visitor' %}" id="visitorCreateForm" novalidate>
+                    {% csrf_token %}
+
+                    <div class="form-grid">
+                        <div class="field-card">
+                            <label for="full_name" class="field-label"><i class="bi bi-person"></i>Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-lg {% if errors.full_name %}is-invalid{% endif %}" id="full_name" name="full_name" value="{{ form_data.full_name }}" required>
+                            <div class="invalid-feedback">{{ errors.full_name }}</div>
+                        </div>
+
+                        <div class="field-card">
+                            <label for="contact_number" class="field-label"><i class="bi bi-telephone"></i>Phone Number <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-lg {% if errors.contact_number %}is-invalid{% endif %}" id="contact_number" name="contact_number" value="{{ form_data.contact_number }}" required>
+                            <div class="invalid-feedback">{{ errors.contact_number }}</div>
+                        </div>
+
+                        <div class="field-card">
+                            <label for="email" class="field-label"><i class="bi bi-envelope"></i>Email Address</label>
+                            <input type="email" class="form-control form-control-lg {% if errors.email %}is-invalid{% endif %}" id="email" name="email" value="{{ form_data.email }}">
+                            <div class="invalid-feedback">{{ errors.email }}</div>
+                        </div>
+
+                        <div class="field-card">
+                            <label for="company_name" class="field-label"><i class="bi bi-building"></i>Company Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-lg {% if errors.company_name %}is-invalid{% endif %}" id="company_name" name="company_name" value="{{ form_data.company_name }}" required>
+                            <div class="invalid-feedback">{{ errors.company_name }}</div>
+                        </div>
+
+                        <div class="field-card">
+                            <label for="visitor_type" class="field-label"><i class="bi bi-collection"></i>Visitor Type <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-lg {% if errors.visitor_type %}is-invalid{% endif %}" id="visitor_type" name="visitor_type" required>
+                                <option value="">Select Type</option>
+                                <option value="CLIENT" {% if form_data.visitor_type == 'CLIENT' %}selected{% endif %}>Client</option>
+                                <option value="VENDOR" {% if form_data.visitor_type == 'VENDOR' %}selected{% endif %}>Vendor</option>
+                                <option value="INTERVIEW" {% if form_data.visitor_type == 'INTERVIEW' %}selected{% endif %}>Interview</option>
+                                <option value="DELIVERY" {% if form_data.visitor_type == 'DELIVERY' %}selected{% endif %}>Delivery</option>
+                            </select>
+                            <div class="invalid-feedback">{{ errors.visitor_type }}</div>
+                        </div>
+
+                        <div class="field-card field-card-wide">
+                            <label for="purpose" class="field-label"><i class="bi bi-chat-square-text"></i>Purpose <span class="text-danger">*</span></label>
+                            <textarea class="form-control form-control-lg {% if errors.purpose %}is-invalid{% endif %}" id="purpose" name="purpose" rows="3" required>{{ form_data.purpose }}</textarea>
+                            <div class="invalid-feedback">{{ errors.purpose }}</div>
+                        </div>
+
+                        <div class="field-card">
+                            <label for="expected_date" class="field-label"><i class="bi bi-calendar-date"></i>Expected Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control form-control-lg {% if errors.expected_date %}is-invalid{% endif %}" id="expected_date" name="expected_date" value="{{ form_data.expected_date }}" required>
+                            <div class="invalid-feedback">{{ errors.expected_date }}</div>
+                        </div>
+
+                        <div class="field-card">
+                            <label for="expected_time" class="field-label"><i class="bi bi-clock"></i>Expected Time <span class="text-danger">*</span></label>
+                            <input type="time" class="form-control form-control-lg {% if errors.expected_time %}is-invalid{% endif %}" id="expected_time" name="expected_time" value="{{ form_data.expected_time }}" required>
+                            <div class="invalid-feedback">{{ errors.expected_time }}</div>
+                        </div>
+
+                        <div class="field-card">
+                            <label for="id_proof_type" class="field-label"><i class="bi bi-shield-check"></i>ID Proof Type <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-lg {% if errors.id_proof_type %}is-invalid{% endif %}" id="id_proof_type" name="id_proof_type" required>
+                                <option value="">Select ID Type</option>
+                                <option value="AADHAR" {% if form_data.id_proof_type == 'AADHAR' %}selected{% endif %}>Aadhar Card</option>
+                                <option value="PAN" {% if form_data.id_proof_type == 'PAN' %}selected{% endif %}>PAN Card</option>
+                                <option value="PASSPORT" {% if form_data.id_proof_type == 'PASSPORT' %}selected{% endif %}>Passport</option>
+                                <option value="DRIVING_LICENSE" {% if form_data.id_proof_type == 'DRIVING_LICENSE' %}selected{% endif %}>Driving License</option>
+                                <option value="VOTER_ID" {% if form_data.id_proof_type == 'VOTER_ID' %}selected{% endif %}>Voter ID</option>
+                            </select>
+                            <div class="invalid-feedback">{{ errors.id_proof_type }}</div>
+                        </div>
+
+                        <div class="field-card">
+                            <label for="id_proof_number" class="field-label"><i class="bi bi-card-text"></i>ID Proof Number <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-lg {% if errors.id_proof_number %}is-invalid{% endif %}" id="id_proof_number" name="id_proof_number" value="{{ form_data.id_proof_number }}" required>
+                            <div class="invalid-feedback">{{ errors.id_proof_number }}</div>
+                        </div>
+                    </div>
+
+                    <div class="form-footer">
+                        <button type="reset" class="gs-btn gs-btn-secondary" id="visitorFormReset"><i class="bi bi-arrow-counterclockwise"></i>Reset</button>
+                        <button type="submit" class="submit-btn" id="visitorSubmitBtn">
+                            <i class="bi bi-check-circle"></i><span>Register Visitor</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="gs-table-card">
+            <div class="gs-panel-head">
+                <div class="gs-card-title"><i class="bi bi-lightning-charge text-success"></i><span>Registration Checklist</span></div>
+            </div>
+            <div class="gs-panel-body">
+                <div class="checklist-stack">
+                    <div class="checklist-item"><i class="bi bi-person-check"></i><div><strong>Identity Ready</strong><small>Collect full name, phone, and an ID proof number.</small></div></div>
+                    <div class="checklist-item"><i class="bi bi-calendar2-check"></i><div><strong>Visit Schedule</strong><small>Choose the expected date and time so the host dashboard refresh shows the visit correctly.</small></div></div>
+                    <div class="checklist-item"><i class="bi bi-building-check"></i><div><strong>Company Context</strong><small>Company name and visitor type help the team filter records in real time.</small></div></div>
+                    <div class="checklist-item"><i class="bi bi-broadcast-pin"></i><div><strong>Live Workflow</strong><small>After submit, the visitor appears in the pending queue and visitor register automatically.</small></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .message-stack {
+        display: grid;
+        gap: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-alert {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.9rem 1rem;
+        border-radius: 14px;
+        font-weight: 600;
+    }
+
+    .form-alert-success {
+        background: #ebfff3;
+        color: #15803d;
+        border: 1px solid #b7efc8;
+    }
+
+    .form-alert-error,
+    .form-alert-danger {
+        background: #fff1f2;
+        color: #be123c;
+        border: 1px solid #fecdd3;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .field-card {
+        padding: 1rem;
+        border: 1px solid #edf2f7;
+        border-radius: 18px;
+        background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    }
+
+    .field-card-wide {
+        grid-column: span 2;
+    }
+
+    .field-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.7rem;
+        font-weight: 700;
+        color: #223553;
+    }
+
+    .form-control-lg,
+    .form-select-lg {
+        min-height: 52px;
+        border-radius: 14px;
+    }
+
+    textarea.form-control-lg {
+        min-height: 104px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #6d4aff;
+        box-shadow: 0 0 0 0.2rem rgba(109, 74, 255, 0.12);
+    }
+
+    .invalid-feedback {
+        display: block;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+
+    .form-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.8rem;
+        margin-top: 1.2rem;
+        flex-wrap: wrap;
+    }
+
+    .submit-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.85rem 1.2rem;
+        border: 0;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: #fff;
+        font-weight: 700;
+        box-shadow: 0 12px 20px rgba(37, 99, 235, 0.18);
+        transition: 0.2s ease;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-1px);
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .checklist-stack {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .checklist-item {
+        display: flex;
+        gap: 0.85rem;
+        align-items: flex-start;
+        padding: 1rem;
+        border-radius: 16px;
+        background: #f8fbff;
+        border: 1px solid #e6eef9;
+    }
+
+    .checklist-item i {
+        font-size: 1.2rem;
+        color: #2563eb;
+    }
+
+    .checklist-item strong {
+        display: block;
+        margin-bottom: 0.2rem;
+    }
+
+    .checklist-item small {
+        color: #64748b;
+    }
+
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .field-card-wide {
+            grid-column: span 1;
+        }
+
+        .form-footer {
+            justify-content: stretch;
+        }
+
+        .form-footer .gs-btn,
+        .submit-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var form = document.getElementById('visitorCreateForm');
+        var submitBtn = document.getElementById('visitorSubmitBtn');
+        var liveAlerts = document.getElementById('form-live-alerts');
+        var requiredFields = Array.from(form.querySelectorAll('[required]'));
+        var csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        function showAlert(message, type) {
+            if (!liveAlerts) return;
+            var icon = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
+            liveAlerts.innerHTML = '<div class="form-alert form-alert-' + type + '"><i class="bi ' + icon + '"></i><span>' + message + '</span></div>';
+        }
+
+        function setFieldError(field, message) {
+            field.classList.add('is-invalid');
+            var feedback = field.parentElement.querySelector('.invalid-feedback');
+            if (feedback) {
+                feedback.textContent = message;
+            }
+        }
+
+        function clearFieldError(field) {
+            field.classList.remove('is-invalid');
+            var feedback = field.parentElement.querySelector('.invalid-feedback');
+            if (feedback) {
+                feedback.textContent = '';
+            }
+        }
+
+        function applyServerErrors(errors) {
+            Object.keys(errors || {}).forEach(function (fieldName) {
+                var field = form.querySelector('[name="' + fieldName + '"]');
+                if (field) {
+                    setFieldError(field, errors[fieldName]);
+                }
+            });
+        }
+
+        function validateField(field) {
+            var value = field.value.trim();
+            if (!value) {
+                setFieldError(field, 'This field is required.');
+                return false;
+            }
+            if (field.name === 'contact_number' && (!/^\d{10,}$/.test(value))) {
+                setFieldError(field, 'Enter a valid phone number with at least 10 digits.');
+                return false;
+            }
+            if (field.name === 'email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                setFieldError(field, 'Enter a valid email address.');
+                return false;
+            }
+            clearFieldError(field);
+            return true;
+        }
+
+        requiredFields.forEach(function (field) {
+            field.addEventListener('input', function () {
+                validateField(field);
+            });
+            field.addEventListener('change', function () {
+                validateField(field);
+            });
+        });
+
+        var emailField = document.getElementById('email');
+        if (emailField) {
+            emailField.addEventListener('input', function () {
+                if (!emailField.value.trim()) {
+                    clearFieldError(emailField);
+                    return;
+                }
+                validateField(emailField);
+            });
+        }
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            var valid = true;
+            liveAlerts.innerHTML = '';
+            requiredFields.forEach(function (field) {
+                valid = validateField(field) && valid;
+            });
+            if (emailField && emailField.value.trim()) {
+                valid = validateField(emailField) && valid;
+            }
+
+            if (!valid) {
+                showAlert('Please complete the required fields correctly.', 'error');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span><span>Submitting...</span>';
+
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                credentials: 'same-origin',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(function (response) {
+                return response.json().then(function (data) {
+                    if (!response.ok) {
+                        throw data;
+                    }
+                    return data;
+                });
+            }).then(function (data) {
+                showAlert(data.message || 'Visitor registered successfully!', 'success');
+                submitBtn.innerHTML = '<i class="bi bi-check-circle"></i><span>Registered</span>';
+                window.setTimeout(function () {
+                    window.location.href = data.redirect_url || "{% url 'host_all_visitors' %}";
+                }, 900);
+            }).catch(function (error) {
+                applyServerErrors(error.errors || {});
+                showAlert(error.message || 'Unable to register visitor right now.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-check-circle"></i><span>Register Visitor</span>';
+            });
+        });
+    });
+</script>
+{% endblock %}

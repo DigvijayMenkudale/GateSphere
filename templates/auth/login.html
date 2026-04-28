@@ -1,0 +1,381 @@
+{% extends "base/base_auth.html" %}
+{% load static %}
+
+{% block title %}Sign In | GateSphere{% endblock %}
+{% block body_class %}no-sidebar auth-page{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-shell {
+        position: relative;
+        width: min(368px, 100%);
+        z-index: 2;
+    }
+
+    .login-card-clean {
+        overflow: hidden;
+        border-radius: 28px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 32px 72px rgba(0, 0, 0, 0.28);
+        height: auto;
+        max-height: none;
+    }
+
+    .login-hero {
+        padding: 32px 28px 22px;
+        text-align: center;
+        color: #fff;
+        background:
+            radial-gradient(circle at top left, rgba(76, 201, 240, 0.18), transparent 34%),
+            radial-gradient(circle at bottom right, rgba(99, 102, 241, 0.22), transparent 30%),
+            linear-gradient(155deg, #141b33 0%, #1c2748 60%, #18355f 100%);
+    }
+
+    .login-brand {
+        margin-bottom: 10px;
+    }
+
+    .login-brand .logo-text {
+        font-size: clamp(2.5rem, 6vw, 3.5rem) !important;
+    }
+
+    .login-hero p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.84);
+        font-size: 1.02rem;
+        font-weight: 500;
+    }
+
+    .login-body-clean {
+        padding: 20px 22px 18px;
+        background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+    }
+
+    .login-alert {
+        margin-bottom: 16px;
+        border-radius: 16px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .login-alert-shell {
+        display: none;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 16px;
+        border: 1px solid #fecaca;
+        border-radius: 16px;
+        background: #fff1f2;
+        color: #991b1b;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .login-alert-shell.show {
+        display: flex;
+    }
+
+    .login-form {
+        display: grid;
+        gap: 12px;
+    }
+
+    .login-field {
+        display: grid;
+        gap: 8px;
+        padding: 12px;
+        border: 1px solid #e5ebf3;
+        border-radius: 20px;
+        background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+    }
+
+    .login-field-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #223553;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .login-field .input-group {
+        align-items: stretch;
+        flex-wrap: nowrap;
+        margin-bottom: 0 !important;
+    }
+
+    .login-password-wrap {
+        position: relative;
+    }
+
+    .login-field .input-group-text {
+        min-width: 56px !important;
+        height: 50px !important;
+        border: 1px solid #d9e2ef !important;
+        border-right: 0 !important;
+        border-radius: 16px 0 0 16px !important;
+        background: #f8fbff !important;
+        color: #4c63d2 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: none !important;
+    }
+
+    .login-field .form-control {
+        height: 50px !important;
+        border: 1px solid #d9e2ef !important;
+        border-left: 0 !important;
+        border-radius: 0 16px 16px 0 !important;
+        background: #fff !important;
+        color: #14233f !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        padding: 0 16px !important;
+        box-shadow: none !important;
+    }
+
+    .login-field input[type="password"].form-control {
+        padding-right: 46px !important;
+    }
+
+    .login-field .form-control::placeholder {
+        color: #94a3b8 !important;
+        opacity: 1;
+    }
+
+    .login-field .form-control:focus {
+        border-color: #8aa5ff !important;
+        box-shadow: 0 0 0 4px rgba(79, 103, 255, 0.12) !important;
+    }
+
+    .login-field .input-group:focus-within .input-group-text {
+        border-color: #8aa5ff !important;
+        background: #eef3ff !important;
+        color: #3452e6 !important;
+    }
+
+    .login-field .password-toggle {
+        position: absolute !important;
+        top: 50% !important;
+        right: 16px !important;
+        transform: translateY(-50%) !important;
+        z-index: 5 !important;
+        color: #7c8aa5 !important;
+        font-size: 1.05rem !important;
+        cursor: pointer !important;
+        width: 20px !important;
+        text-align: center !important;
+        line-height: 1 !important;
+    }
+
+    .login-field .password-toggle:hover {
+        color: #3452e6 !important;
+    }
+
+    .login-options {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin: 0 2px 4px;
+    }
+
+    .remember-me {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .remember-me input {
+        width: 15px;
+        height: 15px;
+        margin: 0;
+    }
+
+    .forgot-password {
+        color: #3157f3;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .forgot-password:hover {
+        color: #2646c8;
+    }
+
+    .login-submit {
+        min-height: 52px;
+        border-radius: 18px !important;
+    }
+
+    .login-footer-clean {
+        padding: 14px 22px 18px;
+        text-align: center;
+        border-top: 1px solid #e8eef6;
+        background: linear-gradient(180deg, #fbfcff 0%, #f6f8fc 100%);
+    }
+
+    .login-footer-clean .primary-link {
+        color: #3157f3;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .login-footer-clean .primary-link:hover {
+        text-decoration: underline;
+    }
+
+    .login-footer-note {
+        margin-top: 8px;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .login-field .invalid-feedback {
+        display: none !important;
+        color: #dc2626 !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        line-height: 1.45 !important;
+        margin-top: 2px !important;
+    }
+
+    .login-field .form-control.is-invalid {
+        border-color: #ef4444 !important;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12) !important;
+    }
+
+    .login-field .form-control.is-valid {
+        border-color: #10b981 !important;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12) !important;
+    }
+
+    .login-field .invalid-feedback:not(:empty) {
+        display: block !important;
+    }
+
+    @media (max-width: 575.98px) {
+        .login-hero {
+            padding: 28px 18px 20px;
+        }
+
+        .login-body-clean,
+        .login-footer-clean {
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
+        .login-options {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .login-field {
+            padding: 12px;
+            border-radius: 18px;
+        }
+
+        .login-field .input-group-text,
+        .login-field .form-control {
+            height: 48px !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center p-3">
+    <div class="login-wrapper w-100">
+        <div class="login-shell">
+            <div class="login-card-clean">
+                <section class="login-hero">
+                    <div class="login-brand">
+                        <div class="logo-text">
+                            <span class="logo-primary">Gate</span>
+                            <span class="logo-secondary">Sphere</span>
+                        </div>
+                    </div>
+                    <p>Smart Visitor Management</p>
+                </section>
+
+                <section class="login-body-clean">
+                    <form method="post" action="{% url 'login' %}" class="login-form" id="loginForm" novalidate>
+                        {% csrf_token %}
+
+                        <div class="login-alert-shell" id="loginInlineAlert" aria-live="polite"></div>
+
+                        {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} login-alert mb-0" role="alert">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if form.errors or form.non_field_errors %}
+                        <div class="alert alert-danger login-alert mb-0" role="alert">
+                            Invalid username or password.
+                        </div>
+                        {% endif %}
+
+                        <div class="login-field">
+                            <label class="login-field-label" for="id_username">
+                                <i class="bi bi-person"></i> Username
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-at"></i></span>
+                                <input type="text" id="id_username" name="username" class="form-control" placeholder="Enter your username" required autocomplete="username">
+                            </div>
+                            <div class="invalid-feedback">Username is required.</div>
+                        </div>
+
+                        <div class="login-field">
+                            <label class="login-field-label" for="id_password">
+                                <i class="bi bi-lock"></i> Password
+                            </label>
+                            <div class="login-password-wrap">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
+                                    <input type="password" id="id_password" name="password" class="form-control" placeholder="Enter your password" required autocomplete="current-password">
+                                </div>
+                                <i class="bi bi-eye password-toggle"></i>
+                            </div>
+                            <div class="invalid-feedback">Password is required.</div>
+                        </div>
+
+                        <div class="login-options">
+                            <label class="remember-me">
+                                <input type="checkbox" id="rememberMe" name="remember_me">
+                                <span>Remember me</span>
+                            </label>
+                            <a href="#" class="forgot-password" onclick="showForgotPasswordToast(); return false;">Forgot Password?</a>
+                        </div>
+
+                        <button type="submit" class="login-btn btn btn-primary login-submit">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                        </button>
+
+                        <input type="hidden" name="next" value="{{ next }}">
+                    </form>
+                </section>
+
+                <section class="login-footer-clean">
+                    <div>
+                        Don't have an account?
+                        <a href="{% url 'signup' %}" class="primary-link">Sign Up</a>
+                    </div>
+                    <div class="login-footer-note">
+                        <i class="bi bi-shield-lock me-1"></i>Secure Login | Enterprise Ready
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,503 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block body_class %}dashboard-layout{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="gs-page-header">
+        <div class="gs-title-row">
+            <div>
+                <h1 class="gs-page-title"><i class="bi bi-person-circle text-primary me-2"></i>My Profile</h1>
+                <p class="gs-page-subtitle">Realtime profile management with secure updates</p>
+            </div>
+            <div class="gs-date-pill"><i class="bi bi-stars me-1"></i>Live workspace</div>
+        </div>
+    </div>
+
+    <div id="profileAlert" class="alert d-none profile-alert" role="alert"></div>
+
+    <div class="profile-shell">
+        <aside class="profile-sidebar-card">
+            <div class="profile-sidebar-top">
+                <div class="profile-photo-wrap">
+                    <div class="profile-photo-ring">
+                        <img id="profilePhotoPreview" class="profile-photo" src="{% if profile and profile.photo %}{{ profile.photo.url }}{% else %}{% static 'favicon.svg' %}{% endif %}" alt="Profile photo">
+                    </div>
+                    <div class="profile-photo-actions">
+                        <button type="button" class="profile-photo-btn" id="photoUploadBtn" title="Upload photo"><i class="bi bi-camera-fill"></i></button>
+                        <button type="button" class="profile-photo-remove-btn {% if not profile or not profile.photo %}d-none{% endif %}" id="photoRemoveBtn" title="Remove photo"><i class="bi bi-trash3"></i></button>
+                    </div>
+                    <input type="file" id="photoInput" accept="image/*" hidden>
+                </div>
+                <h2 id="profileFullNameHeading">{{ user.get_full_name|default:user.username }}</h2>
+                <p id="profileEmailHeading">{{ user.email|default:"No email on file" }}</p>
+                <span class="profile-role-pill">{{ profile.role|default:"User" }}</span>
+            </div>
+
+            <div class="profile-sidebar-grid realtime-profile">
+                <div class="profile-kpi-card">
+                    <span class="profile-kpi-label">Role</span>
+                    <strong class="realtime-value" data-key="role">{{ profile.role|default:"User" }}</strong>
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <div class="profile-kpi-card">
+                    <span class="profile-kpi-label">Department</span>
+                    <strong class="realtime-value" data-key="department">{{ profile.department.name|default:"Unassigned" }}</strong>
+                    <i class="bi bi-building"></i>
+                </div>
+                {% if profile.role == 'ADMIN' %}
+                <div class="profile-kpi-card">
+                    <span class="profile-kpi-label">Total Visitors</span>
+                    <strong class="realtime-value" data-key="total_visitors">{{ visitors_handled }}</strong>
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="profile-kpi-card">
+                    <span class="profile-kpi-label">Checked In</span>
+                    <strong class="realtime-value" data-key="checked_in_visitors">0</strong>
+                    <i class="bi bi-person-check"></i>
+                </div>
+                {% elif profile.role == 'SECURITY' %}
+                <div class="profile-kpi-card">
+                    <span class="profile-kpi-label">My Check-Ins</span>
+                    <strong class="realtime-value" data-key="checkins_processed">{{ checkins_processed }}</strong>
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <div class="profile-kpi-card">
+                    <span class="profile-kpi-label">My Check-Outs</span>
+                    <strong class="realtime-value" data-key="checkouts_processed">0</strong>
+                    <i class="bi bi-door-open"></i>
+                </div>
+                {% else %}
+                <div class="profile-kpi-card">
+                    <span class="profile-kpi-label">Visitors Handled</span>
+                    <strong class="realtime-value" data-key="visitors_handled">{{ visitors_handled }}</strong>
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="profile-kpi-card">
+                    <span class="profile-kpi-label">Approvals Done</span>
+                    <strong class="realtime-value" data-key="approvals_done">{{ approvals_done }}</strong>
+                    <i class="bi bi-check2-circle"></i>
+                </div>
+                {% endif %}
+            </div>
+        </aside>
+
+        <section class="profile-main-card">
+            <div class="profile-tabs">
+                <button type="button" class="profile-tab active" data-profile-tab="edit"><i class="bi bi-pencil-square"></i>Edit Profile</button>
+                <button type="button" class="profile-tab" data-profile-tab="view"><i class="bi bi-eye"></i>View Profile</button>
+                <button type="button" class="profile-tab" data-profile-tab="security"><i class="bi bi-shield-lock"></i>Security</button>
+            </div>
+
+            <section class="profile-panel active" data-profile-panel="edit">
+                <div class="profile-section-head">
+                    <h3>Edit Profile</h3>
+                    <p>Update your details and save them directly to the database.</p>
+                </div>
+                <form id="profileEditForm" novalidate>
+                    {% csrf_token %}
+                    <div class="profile-form-grid">
+                        <div class="profile-field">
+                            <label for="firstName">First Name</label>
+                            <div class="profile-input-wrap"><i class="bi bi-person"></i><input type="text" id="firstName" name="first_name" value="{{ user.first_name|default:'' }}" placeholder="Enter first name"></div>
+                            <div class="profile-error" data-error-for="first_name"></div>
+                        </div>
+                        <div class="profile-field">
+                            <label for="lastName">Last Name</label>
+                            <div class="profile-input-wrap"><i class="bi bi-person"></i><input type="text" id="lastName" name="last_name" value="{{ user.last_name|default:'' }}" placeholder="Enter last name"></div>
+                            <div class="profile-error" data-error-for="last_name"></div>
+                        </div>
+                        <div class="profile-field">
+                            <label for="phoneNumber">Phone Number</label>
+                            <div class="profile-input-wrap"><i class="bi bi-telephone"></i><input type="tel" id="phoneNumber" class="phone-format" name="phone_number" value="{{ profile.phone_number|default:'' }}" placeholder="Enter phone number"></div>
+                            <div class="profile-error" data-error-for="phone_number"></div>
+                        </div>
+                        <div class="profile-field">
+                            <label for="department">Department</label>
+                            <div class="profile-input-wrap"><i class="bi bi-building"></i>
+                                <select id="department" name="department">
+                                    <option value="">Select department</option>
+                                    {% for department in departments %}
+                                    <option value="{{ department.id }}" {% if profile.department_id == department.id %}selected{% endif %}>{{ department.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="profile-error" data-error-for="department"></div>
+                        </div>
+                        <div class="profile-field profile-field-full">
+                            <label>Email Address</label>
+                            <div class="profile-readonly"><i class="bi bi-envelope"></i><span id="profileEmailReadonly">{{ user.email|default:"No email on file" }}</span></div>
+                        </div>
+                    </div>
+                    <div class="profile-actions-row">
+                        <button type="submit" class="profile-primary-btn" id="profileSaveBtn"><i class="bi bi-check-circle"></i>Save Changes</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="profile-panel" data-profile-panel="view">
+                <div class="profile-section-head">
+                    <h3>View Profile</h3>
+                    <p>This section refreshes automatically with your latest account information.</p>
+                </div>
+                <div class="profile-view-grid realtime-profile">
+                    <div class="profile-live-card realtime-card"><div class="profile-live-icon"><i class="bi bi-person-vcard"></i></div><div><span class="profile-live-label">Full Name</span><strong class="realtime-value" data-key="full_name">{{ user.get_full_name|default:user.username }}</strong></div></div>
+                    <div class="profile-live-card realtime-card"><div class="profile-live-icon"><i class="bi bi-envelope"></i></div><div><span class="profile-live-label">Email</span><strong class="realtime-value" data-key="email">{{ user.email }}</strong></div></div>
+                    <div class="profile-live-card realtime-card"><div class="profile-live-icon"><i class="bi bi-clock-history"></i></div><div><span class="profile-live-label">Last Login</span><strong class="realtime-value" data-key="last_login">{% if user.last_login %}{{ user.last_login|date:"M d, Y h:i A" }}{% else %}Never{% endif %}</strong></div></div>
+                    <div class="profile-live-card realtime-card"><div class="profile-live-icon"><i class="bi bi-telephone"></i></div><div><span class="profile-live-label">Phone</span><strong class="realtime-value" data-key="phone">{{ profile.phone_number|default:"Not set" }}</strong></div></div>
+                    <div class="profile-live-card realtime-card"><div class="profile-live-icon"><i class="bi bi-person-badge"></i></div><div><span class="profile-live-label">Role</span><strong class="realtime-value" data-key="role">{{ profile.role|default:"User" }}</strong></div></div>
+                    <div class="profile-live-card realtime-card"><div class="profile-live-icon"><i class="bi bi-building"></i></div><div><span class="profile-live-label">Department</span><strong class="realtime-value" data-key="department">{{ profile.department.name|default:"Unassigned" }}</strong></div></div>
+                </div>
+                <div class="profile-live-foot"><span class="live-indicator">Live • Updated now</span></div>
+            </section>
+
+            <section class="profile-panel" data-profile-panel="security">
+                <div class="profile-section-head">
+                    <h3>Security Settings</h3>
+                    <p>Change your password securely with live validation and feedback.</p>
+                </div>
+                <form id="passwordForm" novalidate>
+                    {% csrf_token %}
+                    <div class="profile-form-grid">
+                        <div class="profile-field profile-field-full">
+                            <label for="oldPassword">Current Password</label>
+                            <div class="profile-input-wrap"><i class="bi bi-lock"></i><input type="password" id="oldPassword" name="old_password" placeholder="Enter current password"></div>
+                            <div class="profile-error" data-error-for="old_password"></div>
+                        </div>
+                        <div class="profile-field">
+                            <label for="newPassword">New Password</label>
+                            <div class="profile-input-wrap"><i class="bi bi-key"></i><input type="password" id="newPassword" name="new_password1" placeholder="Enter new password"></div>
+                            <div class="password-strength"><div class="password-strength-bar" id="passwordStrengthBar"></div></div>
+                            <div class="password-strength-copy" id="passwordStrengthText">Use 8+ characters for a strong password.</div>
+                            <div class="profile-error" data-error-for="new_password1"></div>
+                        </div>
+                        <div class="profile-field">
+                            <label for="confirmPassword">Confirm Password</label>
+                            <div class="profile-input-wrap"><i class="bi bi-shield-check"></i><input type="password" id="confirmPassword" name="new_password2" placeholder="Confirm new password"></div>
+                            <div class="password-match-copy" id="passwordMatchText">Passwords must match before update.</div>
+                            <div class="profile-error" data-error-for="new_password2"></div>
+                        </div>
+                    </div>
+                    <div class="profile-actions-row">
+                        <button type="submit" class="profile-primary-btn" id="passwordSaveBtn"><i class="bi bi-arrow-repeat"></i>Update Password</button>
+                    </div>
+                </form>
+            </section>
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-page { animation: profilePageIn .35s ease; }
+    .profile-shell { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 18px; align-items: start; }
+    .profile-sidebar-card, .profile-main-card { background: #fff; border: 1px solid var(--border-color); border-radius: 18px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06); }
+    .profile-sidebar-card { padding: 20px; position: sticky; top: calc(var(--topbar-height) + 18px); }
+    .profile-sidebar-top { text-align: center; margin-bottom: 18px; }
+    .profile-photo-wrap { position: relative; width: 124px; height: 124px; margin: 0 auto 14px; }
+    .profile-photo-ring { width: 124px; height: 124px; padding: 4px; border-radius: 50%; background: linear-gradient(135deg, #4f67ff, #3918b8); box-shadow: 0 16px 32px rgba(57, 24, 184, 0.18); }
+    .profile-photo { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #fff; border: 4px solid #fff; }
+    .profile-photo-actions { position: absolute; right: 4px; bottom: 4px; display: flex; gap: 8px; }
+    .profile-photo-btn, .profile-photo-remove-btn { width: 38px; height: 38px; border: 0; border-radius: 50%; color: #fff; box-shadow: 0 10px 18px rgba(17, 24, 39, 0.18); }
+    .profile-photo-btn { background: #111827; }
+    .profile-photo-remove-btn { background: #dc2626; }
+    .profile-sidebar-top h2 { margin: 0 0 6px; font-size: 22px; font-weight: 700; color: #16213e; }
+    .profile-sidebar-top p { margin: 0 0 10px; color: #6b7280; font-size: 13px; word-break: break-word; }
+    .profile-role-pill { display: inline-flex; padding: 6px 12px; border-radius: 999px; background: #eef2ff; color: #4338ca; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+    .profile-sidebar-grid, .profile-form-grid, .profile-view-grid { display: grid; gap: 16px; }
+    .profile-sidebar-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .profile-kpi-card, .profile-live-card { position: relative; padding: 14px 16px; border-radius: 16px; background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%); border: 1px solid #e7edf5; transition: transform .2s ease, box-shadow .2s ease; }
+    .profile-kpi-card:hover, .profile-live-card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08); }
+    .profile-kpi-label, .profile-live-label { display: block; font-size: 11px; color: #7b8796; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+    .profile-kpi-card strong, .profile-live-card strong { display: block; color: #16213e; }
+    .profile-kpi-card strong { font-size: 20px; line-height: 1.1; }
+    .profile-kpi-card i { position: absolute; right: 12px; bottom: 12px; font-size: 18px; color: #4f67ff; }
+    .profile-main-card { padding: 18px; }
+    .profile-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+    .profile-tab { min-height: 40px; padding: 0 16px; border: 1px solid #dbe4ef; border-radius: 10px; background: #fff; color: #475467; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; transition: all .18s ease; }
+    .profile-tab.active { border-color: #4f67ff; color: #2240d9; background: #eef3ff; box-shadow: 0 10px 18px rgba(79, 103, 255, 0.14); }
+    .profile-panel { display: none; animation: profilePanelIn .25s ease; }
+    .profile-panel.active { display: block; }
+    .profile-section-head { margin-bottom: 18px; }
+    .profile-section-head h3 { margin: 0 0 4px; font-size: 20px; font-weight: 700; color: #16213e; }
+    .profile-section-head p { margin: 0; color: #6b7280; font-size: 13px; }
+    .profile-form-grid, .profile-view-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .profile-field-full { grid-column: 1 / -1; }
+    .profile-field label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #1f2937; }
+    .profile-input-wrap, .profile-readonly { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 14px; border: 1px solid #dbe4ef; border-radius: 12px; background: #fff; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+    .profile-input-wrap:focus-within { border-color: #4f67ff; box-shadow: 0 0 0 4px rgba(79, 103, 255, 0.12); transform: translateY(-1px); }
+    .profile-input-wrap i, .profile-readonly i, .profile-live-icon { color: #4f67ff; }
+    .profile-input-wrap input, .profile-input-wrap select { width: 100%; border: 0; outline: 0; background: transparent; color: #16213e; font-size: 14px; font-weight: 500; }
+    .profile-readonly { color: #6b7280; background: #f8fafc; }
+    .profile-error { min-height: 18px; padding-top: 6px; color: #dc2626; font-size: 12px; font-weight: 600; }
+    .profile-field.has-error .profile-input-wrap { border-color: #ef4444; box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.10); }
+    .profile-actions-row { display: flex; justify-content: flex-end; margin-top: 10px; }
+    .profile-primary-btn { min-height: 44px; padding: 0 20px; border: 0; border-radius: 12px; background: linear-gradient(135deg, #4f67ff, #3918b8); color: #fff; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; box-shadow: 0 14px 26px rgba(57, 24, 184, 0.18); transition: transform .18s ease, box-shadow .18s ease; }
+    .profile-primary-btn:hover { transform: translateY(-1px); box-shadow: 0 16px 28px rgba(57, 24, 184, 0.24); }
+    .profile-primary-btn:disabled { opacity: .7; pointer-events: none; }
+    .profile-live-card { display: flex; align-items: center; gap: 14px; }
+    .profile-live-icon { width: 46px; height: 46px; border-radius: 14px; background: #eef3ff; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .profile-live-foot { margin-top: 14px; }
+    .live-indicator { display: inline-flex; gap: 8px; color: #1f9d67; font-size: 12px; font-weight: 700; }
+    .password-strength { height: 6px; border-radius: 999px; background: #e5e7eb; overflow: hidden; margin-top: 10px; }
+    .password-strength-bar { height: 100%; width: 0; border-radius: inherit; background: #ef4444; transition: width .25s ease, background-color .25s ease; }
+    .password-strength-copy, .password-match-copy { min-height: 18px; margin-top: 6px; font-size: 12px; color: #6b7280; font-weight: 600; }
+    .profile-alert {
+        position: fixed;
+        right: 24px;
+        top: calc(var(--topbar-height) + 24px);
+        z-index: 1600;
+        width: min(420px, calc(100vw - 32px));
+        margin: 0;
+        padding: 14px 16px;
+        border-radius: 16px;
+        border: 1px solid transparent;
+        box-shadow: 0 18px 32px rgba(15, 23, 42, 0.16);
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        font-weight: 600;
+        backdrop-filter: blur(8px);
+    }
+    .profile-alert i {
+        font-size: 18px;
+        line-height: 1.2;
+    }
+    .profile-alert.alert-success {
+        background: linear-gradient(135deg, #ecfdf3 0%, #dff7e8 100%);
+        border-color: #86efac;
+        color: #166534;
+    }
+    .profile-alert.alert-danger {
+        background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+        border-color: #fda4af;
+        color: #be123c;
+    }
+    .profile-alert.alert-warning {
+        background: linear-gradient(135deg, #fff8e7 0%, #ffedd5 100%);
+        border-color: #fdba74;
+        color: #c2410c;
+    }
+    .profile-alert.alert-info {
+        background: linear-gradient(135deg, #eef6ff 0%, #e0ecff 100%);
+        border-color: #93c5fd;
+        color: #1d4ed8;
+    }
+    .realtime-card.updated, .profile-kpi-card.updated { animation: profilePulse .45s ease; }
+    @keyframes profilePageIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes profilePanelIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes profilePulse { 0% { transform: scale(.99); } 50% { transform: scale(1.01); } 100% { transform: scale(1); } }
+    @media (max-width: 991.98px) { .profile-shell { grid-template-columns: 1fr; } .profile-sidebar-card { position: static; } }
+    @media (max-width: 767.98px) { .profile-form-grid, .profile-view-grid, .profile-sidebar-grid { grid-template-columns: 1fr; } .profile-main-card, .profile-sidebar-card { padding: 16px; } .profile-actions-row { justify-content: stretch; } .profile-primary-btn { width: 100%; justify-content: center; } .profile-alert { right: 16px; top: calc(var(--topbar-height) + 16px); width: calc(100vw - 32px); } }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function () {
+        const editForm = document.getElementById('profileEditForm');
+        const passwordForm = document.getElementById('passwordForm');
+        const alertBox = document.getElementById('profileAlert');
+        const photoInput = document.getElementById('photoInput');
+        const photoButton = document.getElementById('photoUploadBtn');
+        const photoRemoveButton = document.getElementById('photoRemoveBtn');
+        const photoPreview = document.getElementById('profilePhotoPreview');
+        const defaultPhotoUrl = '{% static "favicon.svg" %}';
+        const strengthBar = document.getElementById('passwordStrengthBar');
+        const strengthText = document.getElementById('passwordStrengthText');
+        const matchText = document.getElementById('passwordMatchText');
+        const newPassword = document.getElementById('newPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const tabs = document.querySelectorAll('[data-profile-tab]');
+        const panels = document.querySelectorAll('[data-profile-panel]');
+
+        function showAlert(type, message) {
+            if (!alertBox) return;
+            alertBox.className = 'alert profile-alert alert-' + type;
+            const iconMap = {
+                success: 'bi-check-circle-fill',
+                danger: 'bi-exclamation-triangle-fill',
+                warning: 'bi-exclamation-circle-fill',
+                info: 'bi-info-circle-fill'
+            };
+            alertBox.innerHTML = '<i class="bi ' + (iconMap[type] || iconMap.info) + '"></i><div>' + message + '</div>';
+            alertBox.classList.remove('d-none');
+            window.clearTimeout(showAlert._timer);
+            showAlert._timer = window.setTimeout(() => alertBox.classList.add('d-none'), 4000);
+        }
+
+        function clearErrors(scope) {
+            scope.querySelectorAll('.profile-field').forEach((field) => field.classList.remove('has-error'));
+            scope.querySelectorAll('.profile-error').forEach((error) => error.textContent = '');
+        }
+
+        function applyErrors(scope, errors) {
+            Object.entries(errors || {}).forEach(([key, message]) => {
+                const input = scope.querySelector('[name="' + key + '"]');
+                const error = scope.querySelector('[data-error-for="' + key + '"]');
+                if (input) {
+                    const wrapper = input.closest('.profile-field');
+                    if (wrapper) wrapper.classList.add('has-error');
+                }
+                if (error) error.textContent = message;
+            });
+        }
+
+        function setLoading(button, label) {
+            button.dataset.original = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>' + label;
+        }
+
+        function resetLoading(button) {
+            button.disabled = false;
+            if (button.dataset.original) button.innerHTML = button.dataset.original;
+        }
+
+        tabs.forEach((tab) => {
+            tab.addEventListener('click', function () {
+                const target = this.dataset.profileTab;
+                tabs.forEach((item) => item.classList.toggle('active', item === this));
+                panels.forEach((panel) => panel.classList.toggle('active', panel.dataset.profilePanel === target));
+            });
+        });
+
+        if (photoButton && photoInput) {
+            photoButton.addEventListener('click', () => photoInput.click());
+            photoInput.addEventListener('change', async function () {
+                const file = this.files[0];
+                if (!file) return;
+                const formData = new FormData();
+                formData.append('photo', file);
+                try {
+                    const response = await fetch('{% url "accounts:upload_profile_photo" %}', {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'X-CSRFToken': getCsrfToken() }
+                    });
+                    const data = await response.json();
+                    if (!response.ok || !data.success) throw new Error(data.error || 'Photo upload failed.');
+                    if (data.photo_url) photoPreview.src = data.photo_url;
+                    if (photoRemoveButton) photoRemoveButton.classList.remove('d-none');
+                    showAlert('success', data.message || 'Profile photo updated successfully.');
+                } catch (error) {
+                    showAlert('danger', error.message);
+                } finally {
+                    this.value = '';
+                }
+            });
+        }
+
+        if (photoRemoveButton) {
+            photoRemoveButton.addEventListener('click', async function () {
+                const formData = new FormData();
+                formData.append('action', 'remove');
+                this.disabled = true;
+                try {
+                    const response = await fetch('{% url "accounts:upload_profile_photo" %}', {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'X-CSRFToken': getCsrfToken() }
+                    });
+                    const data = await response.json();
+                    if (!response.ok || !data.success) throw new Error(data.error || 'Photo removal failed.');
+                    photoPreview.src = defaultPhotoUrl;
+                    photoRemoveButton.classList.add('d-none');
+                    showAlert('success', data.message || 'Photo removed successfully.');
+                } catch (error) {
+                    showAlert('danger', error.message);
+                } finally {
+                    this.disabled = false;
+                }
+            });
+        }
+
+        if (editForm) {
+            editForm.addEventListener('submit', async function (event) {
+                event.preventDefault();
+                clearErrors(editForm);
+                const button = document.getElementById('profileSaveBtn');
+                setLoading(button, ' Saving...');
+                try {
+                    const response = await fetch('{% url "update_profile" %}', {
+                        method: 'POST',
+                        body: new FormData(editForm),
+                        headers: { 'X-CSRFToken': getCsrfToken(), 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const data = await response.json();
+                    if (!response.ok || !data.success) {
+                        applyErrors(editForm, data.errors || {});
+                        throw new Error(data.message || 'Please fix the required fields.');
+                    }
+                    document.getElementById('profileFullNameHeading').textContent = data.profile.full_name;
+                    showAlert('success', data.message || 'Profile updated successfully.');
+                } catch (error) {
+                    showAlert('danger', error.message);
+                } finally {
+                    resetLoading(button);
+                }
+            });
+        }
+
+        function updateStrength(value) {
+            let score = 0;
+            if (value.length >= 8) score++;
+            if (/[A-Z]/.test(value)) score++;
+            if (/[a-z]/.test(value)) score++;
+            if (/\d/.test(value)) score++;
+            if (/[^A-Za-z0-9]/.test(value)) score++;
+            const widths = ['0%', '20%', '40%', '60%', '80%', '100%'];
+            const colors = ['#ef4444', '#ef4444', '#f59e0b', '#eab308', '#10b981', '#047857'];
+            const labels = ['Too weak', 'Weak', 'Fair', 'Good', 'Strong', 'Very strong'];
+            strengthBar.style.width = widths[Math.min(score, 5)];
+            strengthBar.style.backgroundColor = colors[Math.min(score, 5)];
+            strengthText.textContent = labels[Math.min(score, 5)];
+        }
+
+        function updateMatch() {
+            if (!confirmPassword.value) {
+                matchText.textContent = 'Passwords must match before update.';
+                matchText.style.color = '#6b7280';
+                return;
+            }
+            const same = newPassword.value === confirmPassword.value;
+            matchText.textContent = same ? 'Passwords match.' : 'Passwords do not match.';
+            matchText.style.color = same ? '#1f9d67' : '#dc2626';
+        }
+
+        if (newPassword) newPassword.addEventListener('input', function () { updateStrength(this.value); updateMatch(); });
+        if (confirmPassword) confirmPassword.addEventListener('input', updateMatch);
+
+        if (passwordForm) {
+            passwordForm.addEventListener('submit', async function (event) {
+                event.preventDefault();
+                clearErrors(passwordForm);
+                const button = document.getElementById('passwordSaveBtn');
+                setLoading(button, ' Updating...');
+                try {
+                    const response = await fetch('{% url "change_password" %}', {
+                        method: 'POST',
+                        body: new FormData(passwordForm),
+                        headers: { 'X-CSRFToken': getCsrfToken(), 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const data = await response.json();
+                    if (!response.ok || !data.success) {
+                        applyErrors(passwordForm, data.errors || {});
+                        throw new Error(data.error || 'Please correct the password fields.');
+                    }
+                    passwordForm.reset();
+                    updateStrength('');
+                    updateMatch();
+                    showAlert('success', data.message || 'Password updated successfully.');
+                } catch (error) {
+                    showAlert('danger', error.message);
+                } finally {
+                    resetLoading(button);
+                }
+            });
+        }
+    })();
+</script>
+{% endblock %}

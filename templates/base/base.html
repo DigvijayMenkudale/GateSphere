@@ -1,0 +1,1330 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}GateSphere{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
+    <link rel="shortcut icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=15">
+    <style>
+        :root {
+            --topbar-height: 44px;
+            --sidebar-width: 228px;
+            --page-bg: #edf1f7;
+            --surface: #ffffff;
+            --surface-soft: #f7f9fc;
+            --border-color: #e8edf3;
+            --text-main: #17223b;
+            --text-muted: #7c8798;
+            --topbar-bg: #1f242c;
+            --sidebar-active-start: #4f67ff;
+            --sidebar-active-end: #3918b8;
+            --shadow-soft: 0 2px 8px rgba(15, 23, 42, 0.05);
+            --shadow-card: 0 2px 10px rgba(15, 23, 42, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--page-bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .gs-topbar {
+            height: var(--topbar-height);
+            background: var(--topbar-bg);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 1050;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .gs-brand,
+        .gs-topbar-right,
+        .gs-user,
+        .gs-sidebar-link,
+        .gs-stat-card,
+        .gs-title-row,
+        .gs-empty-state,
+        .gs-card-title {
+            display: flex;
+            align-items: center;
+        }
+
+        .gs-brand {
+            gap: 8px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .gs-brand-icon {
+            width: 18px;
+            height: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        .gs-topbar-right {
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .gs-notification {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gs-notification-toggle {
+            width: 28px;
+            height: 28px;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.88);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: background-color .18s ease, transform .18s ease;
+        }
+
+        .gs-notification-toggle:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .gs-notification-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            min-width: 14px;
+            height: 14px;
+            padding: 0 3px;
+            border-radius: 999px;
+            background: #ea3943;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            line-height: 14px;
+            text-align: center;
+        }
+
+        .gs-notification-panel {
+            display: none;
+            position: fixed;
+            top: calc(var(--topbar-height) + 6px);
+            right: 56px;
+            width: min(94vw, 360px);
+            max-height: min(76vh, 560px);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+            z-index: 1065;
+            transform: translateY(-8px) scale(.98);
+            opacity: 0;
+            transition: opacity .18s ease, transform .18s ease;
+        }
+
+        .gs-notification-panel.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .gs-notification-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 14px 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .gs-notification-title {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .gs-notification-subtitle {
+            margin: 2px 0 0;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .gs-notification-viewall {
+            font-size: 12px;
+            font-weight: 600;
+            color: #2f6df6;
+        }
+
+        .gs-notification-scroll {
+            max-height: calc(min(76vh, 560px) - 58px);
+            overflow-y: auto;
+        }
+
+        .gs-notification-section {
+            padding: 10px 14px 0;
+        }
+
+        .gs-notification-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #8b95a5;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .gs-notification-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .gs-notification-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: #fbfcff;
+            transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease;
+        }
+
+        .gs-notification-item:hover {
+            background: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px rgba(15, 23, 42, 0.06);
+        }
+
+        .gs-notification-item-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 15px;
+        }
+
+        .gs-tone-primary {
+            color: #2f6df6;
+            background: #eaf1ff;
+        }
+
+        .gs-tone-success {
+            color: #1f9d67;
+            background: #e9f7ef;
+        }
+
+        .gs-tone-warning {
+            color: #f4b400;
+            background: #fff6de;
+        }
+
+        .gs-tone-info {
+            color: #20b8ea;
+            background: #e8f9ff;
+        }
+
+        .gs-tone-danger {
+            color: #ef4444;
+            background: #fdeff1;
+        }
+
+        .gs-tone-secondary {
+            color: #667085;
+            background: #f1f4f8;
+        }
+
+        .gs-notification-item-copy {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .gs-notification-item-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 2px;
+        }
+
+        .gs-notification-item-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .gs-notification-item-count {
+            min-width: 24px;
+            height: 24px;
+            padding: 0 7px;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #2f6df6;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 24px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .gs-notification-item-meta,
+        .gs-notification-item-detail,
+        .gs-notification-item-time {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .gs-notification-empty {
+            padding: 18px 14px 16px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .gs-notification-empty i {
+            font-size: 28px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .gs-user {
+            gap: 8px;
+            color: #fff;
+            font-size: 13px;
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        .gs-user-menu .dropdown-toggle {
+            border: 0;
+            background: transparent;
+            color: #fff;
+            padding: 0 0 0 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        .gs-user-menu {
+            position: relative;
+        }
+
+        .gs-user-menu .dropdown-toggle::after {
+            display: none;
+        }
+
+        .gs-user-menu .dropdown-menu {
+            display: none;
+            min-width: 280px;
+            max-width: min(92vw, 320px);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 8px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+            top: calc(var(--topbar-height) + 6px) !important;
+            right: 12px !important;
+            left: auto !important;
+            inset: auto 12px auto auto !important;
+            margin: 0 !important;
+            transform: none !important;
+            position: fixed !important;
+            z-index: 1065 !important;
+        }
+
+        .gs-user-menu .dropdown-menu.show {
+            display: block;
+        }
+
+        .gs-user-menu .dropdown-item {
+            border-radius: 8px;
+            font-size: 13px;
+            padding: 8px 10px;
+            color: #1f2937;
+        }
+
+        .gs-user-menu .dropdown-item:hover {
+            background: #f5f7fb;
+        }
+
+        .gs-user-menu .dropdown-header {
+            padding: 8px 10px 10px;
+        }
+
+        .gs-profile-summary {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .gs-profile-summary .fw-semibold,
+        .gs-profile-summary [data-profile-field="full_name"] {
+            color: #1f2937;
+        }
+
+        .gs-profile-summary [data-profile-field="email"] {
+            color: #6b7280;
+        }
+
+        .gs-profile-avatar-lg {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #4057d9;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .gs-profile-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            padding: 4px 6px 8px;
+        }
+
+        .gs-profile-stat {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: #f8fafc;
+            padding: 8px;
+        }
+
+        .gs-profile-stat-label {
+            display: block;
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+
+        .gs-profile-stat-value {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #1f2937;
+            word-break: break-word;
+        }
+
+        .gs-profile-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            padding: 6px;
+        }
+
+        .gs-profile-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-height: 34px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 12px;
+            font-weight: 600;
+            color: #1f2937;
+            background: #fff;
+        }
+
+        .gs-profile-action:hover {
+            background: #f8fafc;
+            color: #1f2937;
+        }
+
+        .gs-profile-action-danger {
+            color: #dc2626;
+            border-color: #fecaca;
+            background: #fff5f5;
+        }
+
+        .gs-profile-action-danger:hover {
+            color: #dc2626;
+            background: #fee2e2;
+        }
+
+        .gs-user-name {
+            font-weight: 600;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #93c5fd;
+        }
+
+        .gs-user-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .gs-avatar {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #4057d9;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .gs-role-chip {
+            flex-shrink: 0;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 700;
+            line-height: 1.5;
+            color: #fff;
+            background: #ef4444;
+        }
+
+        .gs-role-chip.role-host {
+            background: #1f9d67;
+        }
+
+        .gs-role-chip.role-security {
+            background: #0ea5e9;
+        }
+
+        .gs-layout {
+            display: block;
+            padding-top: var(--topbar-height);
+        }
+
+        .gs-sidebar {
+            position: fixed;
+            top: var(--topbar-height);
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: #fff;
+            border-right: 1px solid var(--border-color);
+            padding: 14px 10px;
+            overflow-y: auto;
+            z-index: 1035;
+        }
+
+        .gs-sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .gs-sidebar-link {
+            gap: 8px;
+            min-height: 32px;
+            border-radius: 6px;
+            color: #334155;
+            padding: 7px 12px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background-color .15s ease, color .15s ease;
+        }
+
+        .gs-sidebar-link:hover {
+            color: #1f2937;
+            background: #f5f7fb;
+        }
+
+        .gs-sidebar-link.active {
+            color: #fff;
+            background: linear-gradient(90deg, var(--sidebar-active-start) 0%, var(--sidebar-active-end) 100%);
+            box-shadow: 0 4px 12px rgba(57, 24, 184, 0.22);
+        }
+
+        .gs-sidebar-link i {
+            font-size: 12px;
+        }
+
+        .gs-page {
+            margin-left: var(--sidebar-width);
+            padding: 12px;
+        }
+
+        .gs-content {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            box-shadow: var(--shadow-soft);
+            padding: 16px;
+            min-height: calc(100vh - var(--topbar-height) - 24px);
+        }
+
+        body.no-sidebar .gs-page,
+        body.auth-page .gs-page {
+            margin-left: 0;
+        }
+
+        body.auth-page .gs-layout {
+            padding-top: 0;
+        }
+
+        body.no-sidebar .gs-sidebar,
+        body.auth-page .gs-sidebar,
+        body.auth-page .gs-topbar {
+            display: none;
+        }
+
+        .gs-page-header {
+            margin-bottom: 14px;
+        }
+
+        .gs-title-row {
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .gs-page-title {
+            margin: 0;
+            font-size: 21px;
+            font-weight: 700;
+            color: #10234a;
+        }
+
+        .gs-page-subtitle {
+            margin: 2px 0 0;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .gs-date-pill {
+            color: #10234a;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .gs-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .gs-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .gs-card,
+        .gs-table-card,
+        .gs-mini-card {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .gs-stat-card {
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 14px;
+            min-height: 84px;
+            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+        }
+
+        .gs-stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .gs-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2a2f38;
+            line-height: 1.1;
+        }
+
+        .gs-stat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, color .18s ease;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+        }
+
+        .gs-icon-blue {
+            color: #2f6df6;
+            background: #eaf1ff;
+        }
+
+        .gs-icon-yellow {
+            color: #f4b400;
+            background: #fff6de;
+        }
+
+        .gs-icon-green {
+            color: #2f9d68;
+            background: #e9f7ef;
+        }
+
+        .gs-icon-cyan {
+            color: #20b8ea;
+            background: #e8f9ff;
+        }
+
+        .gs-icon-gray {
+            color: #8c98a9;
+            background: #f1f4f8;
+        }
+
+        .gs-stat-card:hover {
+            transform: translateY(-2px);
+            border-color: #dbe4ef;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+        }
+
+        .gs-stat-card:hover .gs-stat-icon {
+            transform: scale(1.08);
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+        }
+
+        .gs-panel-head {
+            padding: 12px 14px 0;
+        }
+
+        .gs-panel-body {
+            padding: 12px 14px 14px;
+        }
+
+        .gs-card-title {
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+
+        .gs-card-title .count-badge {
+            min-width: 18px;
+            height: 18px;
+            padding: 0 6px;
+            border-radius: 5px;
+            background: #1ea35b;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 18px;
+            text-align: center;
+        }
+
+        .gs-card-title .count-badge.info {
+            background: #1fb6e5;
+        }
+
+        .gs-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .gs-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 30px;
+            padding: 0 12px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            background: #fff;
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 28px;
+            color: #374151;
+            cursor: pointer;
+        }
+
+        .gs-btn:hover {
+            color: inherit;
+        }
+
+        .gs-btn-primary {
+            border-color: #2f6df6;
+            color: #2f6df6;
+        }
+
+        .gs-btn-success {
+            border-color: #1f9d67;
+            color: #1f9d67;
+        }
+
+        .gs-btn-secondary {
+            border-color: #97a1af;
+            color: #576171;
+        }
+
+        .gs-btn-green-fill {
+            background: #1f9d67;
+            border-color: #1f9d67;
+            color: #fff;
+        }
+
+        .gs-btn-orange-fill {
+            background: #f59e0b;
+            border-color: #f59e0b;
+            color: #fff;
+        }
+
+        .table-responsive {
+            border-radius: 0 0 14px 14px;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background: #f9fafc;
+            color: #8b95a5;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+            padding: 7px 12px;
+            white-space: nowrap;
+        }
+
+        .table tbody td {
+            font-size: 13px;
+            color: #2f3640;
+            padding: 8px 12px;
+            border-bottom: 1px solid #eef2f6;
+            vertical-align: middle;
+        }
+
+        .gs-status-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 18px;
+            padding: 0 7px;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: 700;
+            line-height: 18px;
+            color: #fff;
+        }
+
+        .gs-status-approved,
+        .gs-status-host {
+            background: #1f9d67;
+        }
+
+        .gs-status-admin {
+            background: #ef4444;
+        }
+
+        .gs-status-security {
+            background: #20b8ea;
+        }
+
+        .gs-empty-state {
+            flex-direction: column;
+            justify-content: center;
+            gap: 10px;
+            min-height: 150px;
+            color: #7c8798;
+            text-align: center;
+            padding: 24px 16px;
+        }
+
+        .gs-empty-state i {
+            font-size: 42px;
+            color: #6e7a88;
+        }
+
+        .gs-empty-state p {
+            margin: 0;
+            font-size: 13px;
+        }
+
+        .gs-summary-boxes {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .gs-summary-boxes.gs-summary-boxes-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .gs-mini-card {
+            padding: 12px 10px;
+            text-align: center;
+        }
+
+        .gs-mini-value {
+            display: block;
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .gs-mini-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .gs-bg-soft-red {
+            background: #fdeff1;
+        }
+
+        .gs-bg-soft-blue {
+            background: #e6f7ff;
+        }
+
+        .gs-bg-soft-green {
+            background: #ecf8f2;
+        }
+
+        .gs-bg-soft-yellow {
+            background: #fff8e2;
+        }
+
+        .gs-bg-soft-gray {
+            background: #f2f4f7;
+        }
+
+        .gs-text-red {
+            color: #ef4444;
+        }
+
+        .gs-text-blue {
+            color: #2f6df6;
+        }
+
+        .gs-text-green {
+            color: #1f9d67;
+        }
+
+        .gs-text-yellow {
+            color: #f59e0b;
+        }
+
+        .gs-text-gray {
+            color: #6b7280;
+        }
+
+        .gs-mobile-toggle {
+            display: none;
+            position: fixed;
+            right: 14px;
+            bottom: 14px;
+            width: 42px;
+            height: 42px;
+            border: 0;
+            border-radius: 50%;
+            background: #3918b8;
+            color: #fff;
+            z-index: 1060;
+            box-shadow: 0 12px 24px rgba(57, 24, 184, 0.25);
+        }
+
+        .gs-sidebar-backdrop {
+            display: none;
+        }
+
+        @media (max-width: 991.98px) {
+            .gs-user-name {
+                max-width: 90px;
+            }
+
+            .gs-sidebar {
+                transform: translateX(-100%);
+                transition: transform .2s ease;
+            }
+
+            body.sidebar-open .gs-sidebar {
+                transform: translateX(0);
+            }
+
+            .gs-sidebar-backdrop {
+                position: fixed;
+                inset: var(--topbar-height) 0 0 0;
+                background: rgba(15, 23, 42, 0.35);
+                z-index: 1030;
+            }
+
+            body.sidebar-open .gs-sidebar-backdrop {
+                display: block;
+            }
+
+            .gs-page {
+                margin-left: 0;
+            }
+
+            .gs-grid-4,
+            .gs-grid-2,
+            .gs-summary-boxes,
+            .gs-summary-boxes.gs-summary-boxes-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .gs-mobile-toggle {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .gs-topbar {
+                padding: 0 10px;
+            }
+
+            .gs-topbar-right {
+                gap: 8px;
+            }
+
+            .gs-user-menu .dropdown-toggle {
+                gap: 6px;
+                padding-left: 2px;
+            }
+
+            .gs-user-name {
+                display: none;
+            }
+
+            .gs-user-menu .dropdown-menu {
+                min-width: min(92vw, 280px);
+                right: 8px !important;
+                inset: auto 8px auto auto !important;
+            }
+
+            .gs-notification-panel {
+                right: 8px;
+                width: min(96vw, 340px);
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+    <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3"></div>
+    {% if user.is_authenticated %}
+    {% with role=user.userprofile.role|default:"HOST" profile=user.userprofile %}
+    <header class="gs-topbar" data-auth-hide>
+        <a href="/" class="gs-brand">
+            <span class="gs-brand-icon"><i class="bi bi-shield-check"></i></span>
+            <span>GateSphere</span>
+        </a>
+        <div class="gs-topbar-right">
+            <div class="gs-notification">
+                <button class="gs-notification-toggle" type="button" data-notification-toggle aria-expanded="false" aria-label="Notifications">
+                    <i class="bi bi-bell-fill"></i>
+                    <span class="gs-notification-count" data-notification-count>{% if pending_count or approved_count %}{{ pending_count|add:approved_count }}{% else %}0{% endif %}</span>
+                </button>
+                <div class="gs-notification-panel" data-notification-panel>
+                    <div class="gs-notification-head">
+                        <div>
+                            <h3 class="gs-notification-title">Notifications</h3>
+                            <p class="gs-notification-subtitle" data-notification-summary>Realtime system activity</p>
+                        </div>
+                        <a href="{% url 'accounts:notifications' %}" class="gs-notification-viewall" data-notification-viewall>View All (0)</a>
+                    </div>
+                    <div class="gs-notification-scroll">
+                        <div class="gs-notification-section">
+                            <div class="gs-notification-section-title">Overview</div>
+                            <div class="gs-notification-list" data-notification-categories></div>
+                        </div>
+                        <div class="gs-notification-section">
+                            <div class="gs-notification-section-title">Recent Activity</div>
+                            <div class="gs-notification-list" data-notification-recent></div>
+                        </div>
+                        <div class="gs-notification-empty" data-notification-empty style="display:none;">
+                            <i class="bi bi-bell-slash"></i>
+                            <div>No notifications available right now</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="dropdown gs-user-menu">
+                <button class="dropdown-toggle gs-user" type="button" data-profile-toggle aria-expanded="false">
+                    <span class="gs-avatar">{{ user.username|slice:":2"|upper }}</span>
+                    <span class="gs-user-name">{{ user.get_full_name|default:user.username }}</span>
+                    <span class="gs-role-chip {% if role == 'HOST' %}role-host{% elif role == 'SECURITY' %}role-security{% endif %}">{{ role }}</span>
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end gs-profile-dropdown">
+                    <div class="dropdown-header">
+                        <div class="gs-profile-summary">
+                            {% if profile and profile.photo %}
+                            <img src="{{ profile.photo.url }}" alt="Profile" class="gs-profile-avatar-lg" data-profile-photo>
+                            {% else %}
+                            <span class="gs-profile-avatar-lg" data-profile-photo-fallback>{{ user.username|slice:":2"|upper }}</span>
+                            {% endif %}
+                            <div>
+                                <div class="fw-semibold" data-profile-field="full_name">{{ user.get_full_name|default:user.username }}</div>
+                                <div class="small text-muted" data-profile-field="email">{{ user.email|default:"No email" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gs-profile-grid">
+                        <div class="gs-profile-stat">
+                            <span class="gs-profile-stat-label">Last Login</span>
+                            <span class="gs-profile-stat-value" data-profile-field="last_login">{% if user.last_login %}{{ user.last_login|date:"M d, Y h:i A" }}{% else %}Never{% endif %}</span>
+                        </div>
+                        <div class="gs-profile-stat">
+                            <span class="gs-profile-stat-label">Phone</span>
+                            <span class="gs-profile-stat-value" data-profile-field="phone">{{ profile.phone_number|default:"Not set" }}</span>
+                        </div>
+                        <div class="gs-profile-stat">
+                            <span class="gs-profile-stat-label">Role</span>
+                            <span class="gs-profile-stat-value" data-profile-field="role">{{ role }}</span>
+                        </div>
+                        <div class="gs-profile-stat">
+                            <span class="gs-profile-stat-label">Department</span>
+                            <span class="gs-profile-stat-value" data-profile-field="department">{{ profile.department.name|default:"Unassigned" }}</span>
+                        </div>
+                    </div>
+                    <div class="gs-profile-actions">
+                        <a class="gs-profile-action" href="{% url 'profile' %}">
+                            <i class="bi bi-person-circle"></i>My Profile
+                        </a>
+                        <a class="gs-profile-action gs-profile-action-danger ajax-logout" href="{% url 'logout' %}">
+                            <i class="bi bi-box-arrow-right"></i>Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    {% endwith %}
+    {% endif %}
+
+    <div class="gs-layout">
+        {% if user.is_authenticated %}
+        {% with role=user.userprofile.role|default:"HOST" url_name=request.resolver_match.url_name %}
+        <div class="gs-sidebar-backdrop"></div>
+        <aside class="gs-sidebar">
+            <nav class="gs-sidebar-nav">
+                {% if role == 'ADMIN' %}
+                <a class="gs-sidebar-link {% if url_name == 'admin_dashboard' %}active{% endif %}" href="{% url 'admin_dashboard' %}">
+                    <i class="bi bi-columns-gap"></i><span>Dashboard</span>
+                </a>
+                <a class="gs-sidebar-link {% if url_name == 'admin_panel' %}active{% endif %}" href="{% url 'admin_panel' %}">
+                    <i class="bi bi-gear"></i><span>Admin Panel</span>
+                </a>
+                <a class="gs-sidebar-link {% if url_name == 'admin_checkin_panel' %}active{% endif %}" href="{% url 'admin_checkin_panel' %}">
+                    <i class="bi bi-box-arrow-in-right"></i><span>Check-In Panel</span>
+                </a>
+                {% elif role == 'SECURITY' %}
+                <a class="gs-sidebar-link {% if url_name == 'security_dashboard' %}active{% endif %}" href="{% url 'security_dashboard' %}">
+                    <i class="bi bi-columns-gap"></i><span>Dashboard</span>
+                </a>
+                <a class="gs-sidebar-link {% if url_name == 'security_checkin' %}active{% endif %}" href="{% url 'security_checkin' %}">
+                    <i class="bi bi-box-arrow-in-right"></i><span>Check-In Panel</span>
+                </a>
+                <a class="gs-sidebar-link {% if url_name == 'security_visitors' %}active{% endif %}" href="{% url 'security_visitors' %}">
+                    <i class="bi bi-people"></i><span>All Visitors</span>
+                </a>
+                {% else %}
+                <a class="gs-sidebar-link {% if url_name == 'host_dashboard' %}active{% endif %}" href="{% url 'host_dashboard' %}">
+                    <i class="bi bi-columns-gap"></i><span>Dashboard</span>
+                </a>
+                <a class="gs-sidebar-link {% if url_name == 'host_pending_visitors' %}active{% endif %}" href="{% url 'host_pending_visitors' %}">
+                    <i class="bi bi-hourglass-split"></i><span>Pending Visitors</span>
+                </a>
+                <a class="gs-sidebar-link {% if url_name == 'host_all_visitors' %}active{% endif %}" href="{% url 'host_all_visitors' %}">
+                    <i class="bi bi-people"></i><span>All Visitors</span>
+                </a>
+                {% endif %}
+            </nav>
+        </aside>
+        {% endwith %}
+        <button class="gs-mobile-toggle" type="button" data-sidebar-toggle aria-label="Toggle sidebar">
+            <i class="bi bi-list"></i>
+        </button>
+        {% endif %}
+
+        <main class="gs-page">
+            <div class="gs-content">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script src="{% static 'js/main.js' %}?v=15"></script>
+    <script src="{% static 'js/auth.js' %}?v=15"></script>
+    <script src="{% static 'js/profile-realtime.js' %}?v=15"></script>
+    <script>
+        (function () {
+            var toggle = document.querySelector('[data-sidebar-toggle]');
+            var backdrop = document.querySelector('.gs-sidebar-backdrop');
+            var profileToggle = document.querySelector('[data-profile-toggle]');
+            var profileMenu = document.querySelector('.gs-profile-dropdown');
+            var notificationToggle = document.querySelector('[data-notification-toggle]');
+            var notificationPanel = document.querySelector('[data-notification-panel]');
+
+            function closeSidebar() {
+                document.body.classList.remove('sidebar-open');
+            }
+
+            function closeProfileMenu() {
+                if (profileMenu) {
+                    profileMenu.classList.remove('show');
+                }
+                if (profileToggle) {
+                    profileToggle.setAttribute('aria-expanded', 'false');
+                }
+            }
+
+            function closeNotificationPanel() {
+                if (notificationPanel) {
+                    notificationPanel.classList.remove('show');
+                }
+                if (notificationToggle) {
+                    notificationToggle.setAttribute('aria-expanded', 'false');
+                }
+            }
+
+            function toggleProfileMenu(event) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                if (!profileMenu || !profileToggle) {
+                    return;
+                }
+                var willOpen = !profileMenu.classList.contains('show');
+                closeProfileMenu();
+                if (willOpen) {
+                    closeNotificationPanel();
+                    profileMenu.classList.add('show');
+                    profileToggle.setAttribute('aria-expanded', 'true');
+                }
+            }
+
+            function toggleNotificationPanel(event) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                if (!notificationPanel || !notificationToggle) {
+                    return;
+                }
+                var willOpen = !notificationPanel.classList.contains('show');
+                closeNotificationPanel();
+                if (willOpen) {
+                    closeProfileMenu();
+                    notificationPanel.classList.add('show');
+                    notificationToggle.setAttribute('aria-expanded', 'true');
+                    document.dispatchEvent(new CustomEvent('gs:notifications-open'));
+                }
+            }
+
+            if (toggle) {
+                toggle.addEventListener('click', function () {
+                    document.body.classList.toggle('sidebar-open');
+                });
+            }
+
+            if (backdrop) {
+                backdrop.addEventListener('click', closeSidebar);
+            }
+
+            if (profileToggle) {
+                profileToggle.addEventListener('click', toggleProfileMenu);
+            }
+
+            if (notificationToggle) {
+                notificationToggle.addEventListener('click', toggleNotificationPanel);
+            }
+
+            document.addEventListener('click', function (event) {
+                if (!profileMenu || !profileToggle) {
+                    closeNotificationPanel();
+                } else if (!event.target.closest('.gs-user-menu')) {
+                    closeProfileMenu();
+                }
+
+                if (notificationPanel && notificationToggle && !event.target.closest('.gs-notification')) {
+                    closeNotificationPanel();
+                }
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    closeProfileMenu();
+                    closeNotificationPanel();
+                }
+            });
+
+            if (profileMenu) {
+                profileMenu.querySelectorAll('a').forEach(function (link) {
+                    link.addEventListener('click', closeProfileMenu);
+                });
+            }
+        })();
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

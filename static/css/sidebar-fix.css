@@ -1,0 +1,64 @@
+/* FIXED: Navbar permanently pinned top, no scroll/overlap with sidebar across all roles (admin/host/security) */
+
+.app-navbar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1060 !important;
+    background: rgba(246, 248, 251, 0.98) !important;
+    backdrop-filter: blur(20px) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+.app-sidebar {
+    position: fixed !important;
+    top: calc(var(--gs-nav-height) + 4px) !important;
+    left: 1.5rem !important;
+    z-index: 1030 !important;
+    border-radius: 0 24px 24px 0 !important;
+    box-shadow: 6px 0 40px rgba(16, 24, 39, 0.3) !important;
+}
+
+.app-main {
+    margin-left: calc(var(--gs-sidebar-width) + 1.5rem) !important;
+    padding-top: 1.25rem !important;
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+    min-height: calc(100vh - var(--gs-nav-height));
+}
+
+@media (max-width: 991.98px) {
+    .app-sidebar {
+        left: calc(-1 * (var(--gs-sidebar-width) + 1rem)) !important;
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    body.sidebar-open .app-sidebar {
+        left: 1.5rem !important;
+    }
+
+    .app-main {
+        margin-left: 0 !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+}
+
+/* Prevent any overlap */
+body {
+    overflow-x: hidden !important;
+}
+
+.app-sidebar {
+    margin-top: 0 !important;
+}
+
+.app-navbar::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--gs-nav-height);
+    background: inherit;
+    z-index: -1;
+}

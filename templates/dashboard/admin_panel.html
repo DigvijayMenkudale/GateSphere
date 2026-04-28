@@ -1,0 +1,368 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block body_class %}dashboard-layout{% endblock %}
+
+{% block content %}
+<div class="gs-page-header">
+    <div class="gs-title-row">
+        <div>
+            <h1 class="gs-page-title"><i class="bi bi-gear text-primary me-2"></i>Admin Panel</h1>
+            <p class="gs-page-subtitle">System management and configuration</p>
+        </div>
+        <div class="gs-date-pill"><i class="bi bi-calendar3 me-1"></i>{% now "F d, Y" %}</div>
+    </div>
+</div>
+
+<div class="gs-grid-4">
+    <div class="gs-card gs-stat-card">
+        <div>
+            <div class="gs-stat-label">Total Visitors</div>
+            <div class="gs-stat-value">{{ total_visitors }}</div>
+        </div>
+        <span class="gs-stat-icon gs-icon-blue"><i class="bi bi-people-fill"></i></span>
+    </div>
+    <div class="gs-card gs-stat-card">
+        <div>
+            <div class="gs-stat-label">Today's Visitors</div>
+            <div id="stat-today-visitors" class="gs-stat-value">{{ today_visitors }}</div>
+        </div>
+        <span class="gs-stat-icon gs-icon-green"><i class="bi bi-calendar-check"></i></span>
+    </div>
+    <div class="gs-card gs-stat-card">
+        <div>
+            <div class="gs-stat-label">Pending Approval</div>
+            <div id="stat-pending-visitors" class="gs-stat-value">{{ pending_visitors }}</div>
+        </div>
+        <span class="gs-stat-icon gs-icon-yellow"><i class="bi bi-hourglass-split"></i></span>
+    </div>
+    <div class="gs-card gs-stat-card">
+        <div>
+            <div class="gs-stat-label">Currently Checked In</div>
+            <div id="stat-checked-in" class="gs-stat-value">{{ checked_in }}</div>
+        </div>
+        <span class="gs-stat-icon gs-icon-cyan"><i class="bi bi-person-check"></i></span>
+    </div>
+</div>
+
+<div class="gs-grid-2">
+    <div class="gs-table-card">
+        <div class="gs-panel-head">
+            <div class="gs-card-title"><i class="bi bi-people text-primary"></i><span>User Management</span></div>
+        </div>
+        <div class="table-responsive">
+            <table class="table" id="admin-users-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Department</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in users %}
+                    <tr data-status="{{ item.userprofile.role|default:'HOST' }}"
+                        data-search="{{ item.username|lower }} {{ item.email|lower }} {{ item.userprofile.role|lower }} {{ item.userprofile.department.name|default:''|lower }}">
+                        <td>{{ item.username }}</td>
+                        <td>{{ item.email|default:"-" }}</td>
+                        <td>
+                            {% if item.userprofile.role == 'ADMIN' %}
+                            <span class="gs-status-pill gs-status-admin">ADMIN</span>
+                            {% elif item.userprofile.role == 'SECURITY' %}
+                            <span class="gs-status-pill gs-status-security">SECURITY</span>
+                            {% else %}
+                            <span class="gs-status-pill gs-status-host">HOST</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ item.userprofile.department.name|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">
+                            <i class="bi bi-people me-2"></i>No users available
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="gs-table-card">
+        <div class="gs-panel-head">
+            <div class="gs-card-title"><i class="bi bi-building text-primary"></i><span>Department Management</span></div>
+        </div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Department Name</th>
+                        <th>Code</th>
+                        <th>Users</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for department in department_rows %}
+                    <tr>
+                        <td>{{ department.name }}</td>
+                        <td>{{ department.code }}</td>
+                        <td>{{ department.user_count }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">
+                            <i class="bi bi-building me-2"></i>No departments available
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="gs-grid-2">
+    <div class="gs-table-card">
+        <div class="gs-panel-head">
+            <div class="gs-card-title"><i class="bi bi-shield-lock text-primary"></i><span>Role Management</span></div>
+        </div>
+        <div class="gs-panel-body">
+            <div class="gs-summary-boxes">
+                <div class="gs-mini-card gs-bg-soft-red">
+                    <span class="gs-mini-value gs-text-red">{{ admin_count }}</span>
+                    <span class="gs-mini-label">Admins</span>
+                </div>
+                <div class="gs-mini-card gs-bg-soft-blue">
+                    <span class="gs-mini-value gs-text-blue">{{ security_count }}</span>
+                    <span class="gs-mini-label">Security</span>
+                </div>
+                <div class="gs-mini-card gs-bg-soft-green">
+                    <span class="gs-mini-value gs-text-green">{{ host_count }}</span>
+                    <span class="gs-mini-label">Hosts</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="gs-table-card">
+        <div class="gs-panel-head">
+            <div class="gs-card-title"><i class="bi bi-bar-chart text-primary"></i><span>Visitor Analytics</span></div>
+        </div>
+        <div class="gs-panel-body">
+            <div class="gs-summary-boxes gs-summary-boxes-2">
+                <div class="gs-mini-card gs-bg-soft-blue">
+                    <span class="gs-mini-value gs-text-blue" id="analytics-total-visitors">{{ total_visitors }}</span>
+                    <span class="gs-mini-label">Total Visitors</span>
+                </div>
+                <div class="gs-mini-card gs-bg-soft-yellow">
+                    <span class="gs-mini-value gs-text-yellow" id="analytics-pending-visitors">{{ pending_visitors }}</span>
+                    <span class="gs-mini-label">Pending</span>
+                </div>
+                <div class="gs-mini-card gs-bg-soft-green">
+                    <span class="gs-mini-value gs-text-green" id="analytics-approved-visitors">{{ approved_visitors }}</span>
+                    <span class="gs-mini-label">Approved</span>
+                </div>
+                <div class="gs-mini-card gs-bg-soft-gray">
+                    <span class="gs-mini-value gs-text-gray" id="analytics-checked-out">{{ checked_out }}</span>
+                    <span class="gs-mini-label">Checked Out</span>
+                </div>
+                <div class="gs-mini-card gs-bg-soft-indigo analytics-mini-card">
+                    <span class="gs-mini-value gs-text-indigo" id="analytics-current-month">{{ analytics_current_month_total }}</span>
+                    <span class="gs-mini-label"><i class="bi bi-calendar-month me-1"></i>This Month</span>
+                </div>
+                <div class="gs-mini-card gs-bg-soft-cyan analytics-mini-card">
+                    <span class="gs-mini-value gs-text-cyan" id="analytics-previous-month">{{ analytics_previous_month_total }}</span>
+                    <span class="gs-mini-label"><i class="bi bi-clock-history me-1"></i>Previous Month</span>
+                </div>
+                <div class="gs-mini-card gs-bg-soft-orange analytics-mini-card">
+                    <span class="gs-mini-value gs-text-orange" id="analytics-last-7-days">{{ analytics_last_7_days_total }}</span>
+                    <span class="gs-mini-label"><i class="bi bi-graph-up-arrow me-1"></i>Last 7 Days</span>
+                </div>
+            </div>
+
+            <div class="analytics-chart-shell">
+                <div class="analytics-chart-head">
+                    <div>
+                        <h3 class="analytics-chart-title"><i class="bi bi-bar-chart-line me-2"></i>Daily Visitors Trend</h3>
+                        <p class="analytics-chart-note">Live last 7 days registration activity with monthly totals tracked in the cards above.</p>
+                    </div>
+                    <div class="analytics-chart-badge">
+                        <i class="bi bi-broadcast-pin me-1"></i>Auto refresh 15s
+                    </div>
+                </div>
+                <div class="analytics-chart-canvas-wrap">
+                    <canvas id="admin-analytics-chart" aria-label="Daily visitors chart"></canvas>
+                </div>
+                <div class="analytics-monthly-strip" id="analytics-monthly-strip">
+                    {% for item in analytics_chart_data.monthly_visitors %}
+                    <div class="analytics-month-pill">
+                        <span class="analytics-month-label">{{ item.label }}</span>
+                        <strong class="analytics-month-count">{{ item.count }}</strong>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="gs-table-card">
+    <div class="gs-panel-head">
+        <div class="gs-card-title"><i class="bi bi-clock-history text-primary"></i><span>Activity Logs</span></div>
+    </div>
+    <div class="table-responsive">
+        <table class="table" id="admin-logs-table">
+            <thead>
+                <tr>
+                    <th>Visitor</th>
+                    <th>Check-In Time</th>
+                    <th>Check-Out Time</th>
+                    <th>Checked In By</th>
+                    <th>Checked Out By</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in recent_logs %}
+                <tr data-search="{{ log.visitor.full_name|lower }} {{ log.check_in_by.username|default:''|lower }} {{ log.check_out_by.username|default:''|lower }}">
+                    <td>{{ log.visitor.full_name }}</td>
+                    <td>{% if log.check_in_time %}{{ log.check_in_time|date:"M d, Y H:i" }}{% else %}-{% endif %}</td>
+                    <td>{% if log.check_out_time %}{{ log.check_out_time|date:"M d, Y H:i" }}{% else %}-{% endif %}</td>
+                    <td>{{ log.check_in_by.username|default:"-" }}</td>
+                    <td>{{ log.check_out_by.username|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">
+                        <i class="bi bi-clock-history me-2"></i>No activity logs available
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{{ analytics_chart_data|json_script:"admin-analytics-data" }}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="{% static 'js/dashboard-role.js' %}?v=15"></script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analytics-mini-card {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .analytics-mini-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.24), transparent 65%);
+        pointer-events: none;
+    }
+
+    .gs-bg-soft-indigo { background: #eef2ff; }
+    .gs-text-indigo { color: #4338ca; }
+    .gs-bg-soft-cyan { background: #ecfeff; }
+    .gs-text-cyan { color: #0f766e; }
+    .gs-bg-soft-orange { background: #fff7ed; }
+    .gs-text-orange { color: #c2410c; }
+
+    .analytics-chart-shell {
+        margin-top: 1.2rem;
+        padding: 1rem;
+        border: 1px solid #e6eef9;
+        border-radius: 20px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .analytics-chart-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .analytics-chart-title {
+        margin: 0;
+        font-size: 1.02rem;
+        font-weight: 800;
+        color: #1e293b;
+    }
+
+    .analytics-chart-note {
+        margin: 0.3rem 0 0;
+        color: #64748b;
+        font-size: 0.92rem;
+    }
+
+    .analytics-chart-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.55rem 0.8rem;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .analytics-chart-canvas-wrap {
+        position: relative;
+        min-height: 290px;
+    }
+
+    .analytics-monthly-strip {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .analytics-month-pill {
+        padding: 0.85rem 0.9rem;
+        border: 1px solid #dbe6f5;
+        border-radius: 16px;
+        background: #ffffff;
+        text-align: center;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+    }
+
+    .analytics-month-label {
+        display: block;
+        margin-bottom: 0.3rem;
+        color: #64748b;
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+
+    .analytics-month-count {
+        display: block;
+        color: #1e3a8a;
+        font-size: 1.05rem;
+        font-weight: 800;
+    }
+
+    @media (max-width: 768px) {
+        .analytics-chart-shell {
+            padding: 0.9rem;
+        }
+
+        .analytics-chart-canvas-wrap {
+            min-height: 240px;
+        }
+
+        .analytics-monthly-strip {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,553 @@
+<style>
+    .gs-doc-page {
+        display: grid;
+        gap: 22px;
+    }
+
+    .gs-doc-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(320px, 1fr);
+        gap: 18px;
+        align-items: stretch;
+        border: 1px solid #e5ebf3;
+        border-radius: 22px;
+        background:
+            radial-gradient(circle at top right, rgba(99, 102, 241, 0.08), transparent 32%),
+            linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+        box-shadow: 0 12px 34px rgba(15, 23, 42, 0.06);
+        padding: 24px;
+        overflow: hidden;
+    }
+
+    .gs-doc-hero-copy,
+    .gs-doc-hero-meta {
+        min-width: 0;
+    }
+
+    .gs-doc-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        color: #5f6b7a;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .gs-doc-icon-badge {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    }
+
+    .gs-doc-accent-primary {
+        color: #335cff;
+        background: #e9efff;
+    }
+
+    .gs-doc-accent-info {
+        color: #0ea5e9;
+        background: #e8f8ff;
+    }
+
+    .gs-doc-accent-success {
+        color: #1f9d67;
+        background: #ebf8f1;
+    }
+
+    .gs-doc-accent-warning {
+        color: #d97706;
+        background: #fff4df;
+    }
+
+    .gs-doc-title {
+        margin: 0 0 10px;
+        font-size: clamp(2rem, 3vw, 2.7rem);
+        line-height: 1.05;
+        font-weight: 800;
+        color: #112543;
+    }
+
+    .gs-doc-subtitle {
+        margin: 0;
+        max-width: 720px;
+        font-size: 15px;
+        line-height: 1.7;
+        color: #687588;
+    }
+
+    .gs-doc-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 22px;
+    }
+
+    .gs-doc-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 42px;
+        padding: 0 16px;
+        border: 1px solid #d7dfeb;
+        border-radius: 999px;
+        background: #fff;
+        color: #1f2937;
+        font-size: 13px;
+        font-weight: 700;
+        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .gs-doc-action:hover {
+        color: #1f2937;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+        border-color: #c9d5e7;
+    }
+
+    .gs-doc-action-primary {
+        color: #fff;
+        border-color: transparent;
+        background: linear-gradient(135deg, #4f67ff 0%, #3918b8 100%);
+        box-shadow: 0 12px 24px rgba(57, 24, 184, 0.22);
+    }
+
+    .gs-doc-action-primary:hover {
+        color: #fff;
+    }
+
+    .gs-doc-hero-meta {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .gs-doc-stat-card {
+        position: relative;
+        border: 1px solid #e5ebf3;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 18px;
+        overflow: hidden;
+        transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+    }
+
+    .gs-doc-stat-card::after {
+        content: "";
+        position: absolute;
+        inset: auto -18px -26px auto;
+        width: 86px;
+        height: 86px;
+        border-radius: 50%;
+        background: rgba(99, 102, 241, 0.08);
+    }
+
+    .gs-doc-stat-card:hover {
+        transform: translateY(-3px);
+        border-color: #d8e2f0;
+        box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    .gs-doc-stat-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #8792a5;
+    }
+
+    .gs-doc-stat-value {
+        position: relative;
+        z-index: 1;
+        display: block;
+        font-size: clamp(1.45rem, 2vw, 1.9rem);
+        font-weight: 800;
+        color: #162848;
+    }
+
+    .gs-doc-stat-help {
+        position: relative;
+        z-index: 1;
+        display: block;
+        margin-top: 6px;
+        color: #6f7b8d;
+        font-size: 12px;
+    }
+
+    .gs-doc-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.8fr) minmax(280px, 0.92fr);
+        gap: 20px;
+        align-items: start;
+    }
+
+    .gs-doc-article,
+    .gs-doc-side-card {
+        border: 1px solid #e5ebf3;
+        border-radius: 20px;
+        background: #fff;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+    }
+
+    .gs-doc-article {
+        overflow: hidden;
+    }
+
+    .gs-doc-card-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 22px 22px 0;
+    }
+
+    .gs-doc-card-kicker {
+        margin: 0 0 6px;
+        color: #7d8796;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .gs-doc-card-title {
+        margin: 0;
+        color: #162848;
+        font-size: 24px;
+        font-weight: 800;
+    }
+
+    .gs-doc-card-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        background: #ebf8f1;
+        color: #1f9d67;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .gs-doc-card-pill i {
+        font-size: 8px;
+    }
+
+    .gs-doc-richtext {
+        padding: 22px;
+        color: #334155;
+        line-height: 1.75;
+        font-size: 15px;
+    }
+
+    .gs-doc-richtext > :first-child {
+        margin-top: 0;
+    }
+
+    .gs-doc-richtext > :last-child {
+        margin-bottom: 0;
+    }
+
+    .gs-doc-richtext h1,
+    .gs-doc-richtext h2,
+    .gs-doc-richtext h3,
+    .gs-doc-richtext h4 {
+        color: #12274b;
+        font-weight: 800;
+        scroll-margin-top: 76px;
+    }
+
+    .gs-doc-richtext h2,
+    .gs-doc-richtext h3 {
+        margin-top: 1.8rem;
+        margin-bottom: 0.85rem;
+    }
+
+    .gs-doc-richtext p,
+    .gs-doc-richtext ul,
+    .gs-doc-richtext ol,
+    .gs-doc-richtext table,
+    .gs-doc-richtext blockquote,
+    .gs-doc-richtext pre {
+        margin-bottom: 1rem;
+    }
+
+    .gs-doc-richtext ul,
+    .gs-doc-richtext ol {
+        padding-left: 1.25rem;
+    }
+
+    .gs-doc-richtext a {
+        color: #335cff;
+        font-weight: 600;
+    }
+
+    .gs-doc-richtext img,
+    .gs-doc-richtext iframe {
+        max-width: 100%;
+        border-radius: 16px;
+    }
+
+    .gs-doc-richtext pre,
+    .gs-doc-richtext code {
+        font-family: Consolas, "Courier New", monospace;
+    }
+
+    .gs-doc-richtext pre {
+        overflow-x: auto;
+        border-radius: 14px;
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 16px;
+    }
+
+    .gs-doc-richtext code {
+        background: #eef3ff;
+        color: #2743b5;
+        border-radius: 6px;
+        padding: 2px 6px;
+    }
+
+    .gs-doc-richtext pre code {
+        background: transparent;
+        color: inherit;
+        padding: 0;
+    }
+
+    .gs-doc-richtext table {
+        width: 100%;
+        overflow: hidden;
+        border-collapse: collapse;
+        border-radius: 14px;
+        border: 1px solid #e5ebf3;
+    }
+
+    .gs-doc-richtext th,
+    .gs-doc-richtext td {
+        padding: 12px 14px;
+        border-bottom: 1px solid #edf1f6;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .gs-doc-richtext th {
+        background: #f8fafc;
+        color: #667085;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .gs-doc-richtext blockquote {
+        margin-left: 0;
+        padding: 14px 16px;
+        border-left: 4px solid #4f67ff;
+        border-radius: 0 14px 14px 0;
+        background: #f7f9ff;
+        color: #4a5565;
+    }
+
+    .gs-doc-rail {
+        display: grid;
+        gap: 16px;
+        position: sticky;
+        top: 58px;
+    }
+
+    .gs-doc-side-card {
+        padding: 18px;
+    }
+
+    .gs-doc-side-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .gs-doc-side-head h3 {
+        margin: 0;
+        color: #13284a;
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .gs-doc-side-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4f67ff 0%, #3918b8 100%);
+        box-shadow: 0 0 0 6px rgba(79, 103, 255, 0.12);
+    }
+
+    .gs-doc-toc,
+    .gs-doc-link-list,
+    .gs-doc-detail-list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .gs-doc-toc-link,
+    .gs-doc-link-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-width: 0;
+        border: 1px solid #e8edf4;
+        border-radius: 14px;
+        background: #fbfcff;
+        color: #23334d;
+        padding: 12px 14px;
+        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, background-color .2s ease;
+    }
+
+    .gs-doc-toc-link:hover,
+    .gs-doc-link-item:hover,
+    .gs-doc-toc-link.is-active {
+        color: #1f2937;
+        border-color: #d5dff0;
+        background: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+    }
+
+    .gs-doc-link-copy {
+        min-width: 0;
+        display: grid;
+        gap: 4px;
+    }
+
+    .gs-doc-link-copy strong,
+    .gs-doc-detail-row strong {
+        color: #172b4d;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .gs-doc-link-copy small {
+        color: #7b8797;
+        font-size: 11px;
+    }
+
+    .gs-doc-detail-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 12px 0;
+        border-bottom: 1px solid #edf2f7;
+    }
+
+    .gs-doc-detail-row:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .gs-doc-detail-row span {
+        color: #7b8797;
+        font-size: 12px;
+    }
+
+    .gs-doc-empty-note {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px dashed #d6ddeb;
+        border-radius: 14px;
+        padding: 14px;
+        color: #657184;
+        font-size: 13px;
+    }
+
+    .gs-doc-reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity .55s ease, transform .55s ease;
+    }
+
+    .gs-doc-reveal.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    @media (max-width: 1199.98px) {
+        .gs-doc-hero,
+        .gs-doc-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .gs-doc-rail {
+            position: static;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .gs-doc-hero,
+        .gs-doc-article,
+        .gs-doc-side-card {
+            border-radius: 18px;
+        }
+
+        .gs-doc-hero,
+        .gs-doc-richtext,
+        .gs-doc-side-card {
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
+        .gs-doc-card-head {
+            padding: 18px 16px 0;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .gs-doc-richtext {
+            padding-top: 18px;
+        }
+
+        .gs-doc-actions {
+            flex-direction: column;
+        }
+
+        .gs-doc-action {
+            justify-content: center;
+        }
+
+        .gs-doc-richtext table,
+        .gs-doc-richtext thead,
+        .gs-doc-richtext tbody,
+        .gs-doc-richtext tr,
+        .gs-doc-richtext th,
+        .gs-doc-richtext td {
+            display: block;
+            width: 100%;
+        }
+
+        .gs-doc-richtext thead {
+            display: none;
+        }
+
+        .gs-doc-richtext tr {
+            border-bottom: 1px solid #edf2f7;
+            padding: 10px 0;
+        }
+
+        .gs-doc-richtext td {
+            border: 0;
+            padding: 6px 0;
+        }
+    }
+</style>

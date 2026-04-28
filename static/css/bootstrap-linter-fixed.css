@@ -1,0 +1,37 @@
+/* Bootstrap 5.3.3 - VSCode Linter Fixed */
+/* Standard appearance properties added for compatibility */
+
+::file-selector-button {
+    -webkit-appearance: button;
+    appearance: button;
+    font: inherit;
+    border-style: solid;
+    margin: 0;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: .375rem;
+}
+
+[type=search] {
+    -webkit-appearance: textfield;
+    appearance: textfield;
+    outline-offset: -2px;
+}
+
+::-webkit-file-upload-button {
+    -webkit-appearance: button;
+    appearance: button;
+    font: inherit;
+}

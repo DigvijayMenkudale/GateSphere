@@ -1,0 +1,755 @@
+{% extends "base/base_auth.html" %}
+{% load static %}
+
+{% block title %}Create Account | GateSphere{% endblock %}
+{% block body_class %}no-sidebar auth-page{% endblock %}
+
+{% block extra_css %}
+<style>
+    .signup-shell {
+        position: relative;
+        width: min(1120px, 100%);
+        z-index: 2;
+    }
+
+    .signup-grid {
+        display: grid;
+        grid-template-columns: minmax(320px, 0.92fr) minmax(0, 1.08fr);
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow: 0 30px 70px rgba(0, 0, 0, 0.28);
+        background: rgba(255, 255, 255, 0.98);
+    }
+
+    .signup-panel {
+        position: relative;
+        padding: 40px 34px;
+        color: #fff;
+        background:
+            radial-gradient(circle at top left, rgba(76, 201, 240, 0.22), transparent 34%),
+            radial-gradient(circle at bottom right, rgba(99, 102, 241, 0.28), transparent 32%),
+            linear-gradient(155deg, #0f172a 0%, #172554 54%, #312e81 100%);
+    }
+
+    .signup-panel::after {
+        content: "";
+        position: absolute;
+        inset: auto -58px -70px auto;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .signup-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 34px;
+        padding: 0 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .signup-panel h1 {
+        margin: 18px 0 12px;
+        font-size: clamp(2rem, 3vw, 2.8rem);
+        line-height: 1.05;
+        font-weight: 800;
+    }
+
+    .signup-panel p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.82);
+        line-height: 1.7;
+        font-size: 15px;
+    }
+
+    .signup-benefits {
+        display: grid;
+        gap: 14px;
+        margin-top: 28px;
+    }
+
+    .signup-benefit {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 16px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    .signup-benefit i {
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.12);
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .signup-benefit strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .signup-benefit span {
+        display: block;
+        color: rgba(255, 255, 255, 0.74);
+        font-size: 13px;
+        line-height: 1.55;
+    }
+
+    .signup-panel-footer {
+        margin-top: 28px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        color: rgba(255, 255, 255, 0.84);
+        font-size: 13px;
+    }
+
+    .signup-panel-footer .brand-dot {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.12);
+        font-size: 18px;
+    }
+
+    .signup-form-card {
+        padding: 34px;
+        background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+    }
+
+    .signup-form-card .signup-form-head,
+    .signup-form-card .signup-alert,
+    .signup-form-card .signup-form,
+    .signup-form-card .signup-footer {
+        position: relative;
+        z-index: 1;
+    }
+
+    .signup-form-head {
+        margin-bottom: 20px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid #e8eef6;
+    }
+
+    .signup-form-head h2 {
+        margin: 0 0 6px;
+        color: #11203f;
+        font-size: 1.9rem;
+        font-weight: 800;
+    }
+
+    .signup-form-head p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .signup-alert {
+        display: none;
+        margin-bottom: 18px;
+        border-radius: 16px;
+        border: 1px solid #fecaca;
+        background: #fff1f2;
+        color: #b91c1c;
+        padding: 12px 14px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .signup-alert.show {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        animation: signupSlideIn .25s ease;
+    }
+
+    .signup-form {
+        display: grid;
+        gap: 14px;
+    }
+
+    .signup-row-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .signup-field {
+        display: grid;
+        gap: 7px;
+        align-content: start;
+        padding: 16px;
+        border: 1px solid #e6edf7;
+        border-radius: 20px;
+        background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .signup-field:hover {
+        transform: translateY(-1px);
+        border-color: #d7e1f0;
+        box-shadow: 0 14px 28px rgba(15, 23, 42, 0.06);
+    }
+
+    .signup-field-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .signup-field-label small {
+        margin: 0 !important;
+        color: #94a3b8 !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
+    }
+
+    .signup-field .input-group {
+        margin-bottom: 0 !important;
+        align-items: stretch;
+        flex-wrap: nowrap;
+        border-radius: 16px;
+    }
+
+    .signup-helper {
+        margin: 0;
+        color: #748092;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .signup-role-note {
+        border: 1px solid #dbe6f3;
+        border-radius: 16px;
+        background: #f8fbff;
+        padding: 12px 14px;
+        color: #385071;
+        font-size: 13px;
+        line-height: 1.55;
+        transition: border-color .2s ease, background-color .2s ease, transform .2s ease;
+    }
+
+    .signup-role-note strong {
+        display: block;
+        margin-bottom: 4px;
+        color: #11203f;
+        font-size: 13px;
+    }
+
+    .signup-role-note.is-active {
+        border-color: #b9ccff;
+        background: #eef4ff;
+        transform: translateY(-1px);
+    }
+
+    .security-code-container {
+        display: none;
+    }
+
+    .security-code-container.is-visible {
+        display: grid;
+        animation: signupSlideIn .25s ease;
+    }
+
+    .password-strength {
+        display: grid;
+        gap: 8px;
+        padding: 12px 14px;
+        border: 1px solid #e5ebf3;
+        border-radius: 16px;
+        background: #f8fbff;
+    }
+
+    .password-strength-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .password-strength-meter {
+        height: 8px;
+        border-radius: 999px;
+        background: #e5e7eb;
+        overflow: hidden;
+    }
+
+    .password-strength-bar {
+        width: 0;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #ef4444 0%, #f59e0b 52%, #10b981 100%);
+        transition: width .25s ease;
+    }
+
+    .password-checks {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .password-check {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 36px;
+        border: 1px solid #e5ebf3;
+        border-radius: 12px;
+        background: #fff;
+        color: #64748b;
+        padding: 0 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .password-check i {
+        color: #cbd5e1;
+        transition: color .2s ease;
+    }
+
+    .password-check.is-valid {
+        border-color: #b7ebd0;
+        background: #eefbf4;
+        color: #166534;
+    }
+
+    .password-check.is-valid i {
+        color: #16a34a;
+    }
+
+    .signup-submit {
+        min-height: 56px;
+        border-radius: 18px !important;
+    }
+
+    .signup-form-card .form-control,
+    .signup-form-card .form-select {
+        height: 54px !important;
+        border: 1px solid #d9e2ef !important;
+        border-left: 0 !important;
+        border-radius: 0 16px 16px 0 !important;
+        background: #fff !important;
+        color: #14233f !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        padding: 0 16px !important;
+        box-shadow: none !important;
+        transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease !important;
+    }
+
+    .signup-form-card .form-control::placeholder {
+        color: #94a3b8 !important;
+        opacity: 1;
+    }
+
+    .signup-form-card .input-group-text {
+        min-width: 56px !important;
+        height: 54px !important;
+        border: 1px solid #d9e2ef !important;
+        border-right: 0 !important;
+        border-radius: 16px 0 0 16px !important;
+        background: #f8fbff !important;
+        color: #4c63d2 !important;
+        font-size: 16px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: none !important;
+    }
+
+    .signup-form-card .form-control:focus,
+    .signup-form-card .form-select:focus {
+        border-color: #8aa5ff !important;
+        background: #fff !important;
+        box-shadow: 0 0 0 4px rgba(79, 103, 255, 0.12) !important;
+    }
+
+    .signup-form-card .input-group:focus-within .input-group-text {
+        border-color: #8aa5ff !important;
+        background: #eef3ff !important;
+        color: #3452e6 !important;
+    }
+
+    .signup-form-card .form-control.is-invalid,
+    .signup-form-card .form-select.is-invalid {
+        border-color: #ef4444 !important;
+        background: #fff !important;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12) !important;
+    }
+
+    .signup-form-card .input-group:has(.is-invalid) .input-group-text {
+        border-color: #ef4444 !important;
+        background: #fff3f2 !important;
+        color: #dc2626 !important;
+    }
+
+    .signup-form-card .form-control.is-valid,
+    .signup-form-card .form-select.is-valid {
+        border-color: #10b981 !important;
+        background: #fff !important;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12) !important;
+    }
+
+    .signup-form-card .input-group:has(.is-valid) .input-group-text {
+        border-color: #10b981 !important;
+        background: #effcf6 !important;
+        color: #059669 !important;
+    }
+
+    .signup-form-card .invalid-feedback {
+        display: none !important;
+        margin-top: 2px !important;
+        color: #dc2626 !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        line-height: 1.45 !important;
+    }
+
+    .signup-form-card .invalid-feedback:not(:empty) {
+        display: block !important;
+    }
+
+    .signup-form-card .password-toggle {
+        right: 16px !important;
+        color: #7c8aa5 !important;
+        z-index: 4 !important;
+    }
+
+    .signup-form-card .password-toggle:hover {
+        color: #3452e6 !important;
+    }
+
+    .signup-form-card .signup-role-note,
+    .signup-form-card .password-strength,
+    .signup-form-card .signup-alert {
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+    }
+
+    .signup-footer {
+        margin-top: 8px;
+        text-align: center;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .signup-footer a {
+        color: #3157f3;
+        font-weight: 700;
+    }
+
+    @keyframes signupSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-6px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .signup-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .signup-panel,
+        .signup-form-card {
+            padding: 28px 24px;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .signup-shell {
+            width: 100%;
+        }
+
+        .signup-row-2,
+        .password-checks {
+            grid-template-columns: 1fr;
+        }
+
+        .signup-panel,
+        .signup-form-card {
+            padding: 22px 18px;
+        }
+
+        .signup-field {
+            padding: 14px;
+            border-radius: 18px;
+        }
+
+        .signup-form-card .form-control,
+        .signup-form-card .form-select,
+        .signup-form-card .input-group-text {
+            height: 52px !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center p-3">
+    <div class="login-wrapper w-100">
+        <div class="signup-shell">
+            <div class="signup-grid">
+                <section class="signup-panel">
+                    <span class="signup-kicker">
+                        <i class="bi bi-shield-check"></i> GateSphere Access
+                    </span>
+                    <h1>Create a realtime visitor management account</h1>
+                    <p>Join GateSphere with the role and department that matches your team. Every field validates live, and protected roles unlock secure access code checks automatically.</p>
+
+                    <div class="signup-benefits">
+                        <div class="signup-benefit">
+                            <i class="bi bi-person-badge"></i>
+                            <div>
+                                <strong>Role-based onboarding</strong>
+                                <span>Host, Security, and Admin accounts all follow the same live signup flow with the right access checks.</span>
+                            </div>
+                        </div>
+                        <div class="signup-benefit">
+                            <i class="bi bi-lightning-charge"></i>
+                            <div>
+                                <strong>Instant validation feedback</strong>
+                                <span>Username, email, password, and secure-role requirements are checked as the user interacts with the form.</span>
+                            </div>
+                        </div>
+                        <div class="signup-benefit">
+                            <i class="bi bi-phone"></i>
+                            <div>
+                                <strong>Responsive on every screen</strong>
+                                <span>The layout stays clear and usable on desktop, tablet, and mobile without collapsing the form logic.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="signup-panel-footer">
+                        <span class="brand-dot"><i class="bi bi-grid-1x2-fill"></i></span>
+                        <div>
+                            <strong class="d-block">GateSphere Workspace</strong>
+                            <span>Secure visitor operations for admin desks, hosts, and security teams.</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="signup-form-card">
+                    <div class="signup-form-head">
+                        <h2>Create account</h2>
+                        <p>Fill in your details and we’ll set up your account with the correct access rules.</p>
+                    </div>
+
+                    <div class="signup-alert" id="signupAlert" aria-live="polite"></div>
+
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="signup-alert show">
+                        <i class="bi bi-exclamation-octagon-fill"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <form method="post" action="{% url 'signup' %}" class="signup-form" id="signupForm" novalidate>
+                        {% csrf_token %}
+
+                        <div class="signup-row-2">
+                            <div class="signup-field">
+                                <label class="signup-field-label" for="id_first_name">
+                                    <span>First name</span>
+                                    <small>Required</small>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    <input type="text" name="first_name" class="form-control" id="id_first_name" placeholder="Enter first name" required>
+                                </div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="signup-field">
+                                <label class="signup-field-label" for="id_last_name">
+                                    <span>Last name</span>
+                                    <small>Required</small>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person-vcard"></i></span>
+                                    <input type="text" name="last_name" class="form-control" id="id_last_name" placeholder="Enter last name" required>
+                                </div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+
+                        <div class="signup-field">
+                            <label class="signup-field-label" for="id_username">
+                                <span>Username</span>
+                                <small>Required</small>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-at"></i></span>
+                                <input type="text" name="username" class="form-control" id="id_username" placeholder="Choose a username" required autocomplete="username">
+                            </div>
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="signup-field">
+                            <label class="signup-field-label" for="id_email">
+                                <span>Email address</span>
+                                <small>Required</small>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input type="email" name="email" class="form-control" id="id_email" placeholder="Enter your email address" required autocomplete="email">
+                            </div>
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="signup-row-2">
+                            <div class="signup-field">
+                                <label class="signup-field-label" for="id_password">
+                                    <span>Password</span>
+                                    <small>Required</small>
+                                </label>
+                                <div class="input-group position-relative">
+                                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                    <input type="password" name="password" class="form-control" id="id_password" placeholder="Create password" required autocomplete="new-password">
+                                    <i class="bi bi-eye password-toggle" id="passwordToggle"></i>
+                                </div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="signup-field">
+                                <label class="signup-field-label" for="id_confirm_password">
+                                    <span>Confirm password</span>
+                                    <small>Required</small>
+                                </label>
+                                <div class="input-group position-relative">
+                                    <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                                    <input type="password" name="confirm_password" class="form-control" id="id_confirm_password" placeholder="Confirm password" required autocomplete="new-password">
+                                    <i class="bi bi-eye password-toggle" id="confirmPasswordToggle"></i>
+                                </div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+
+                        <div class="password-strength" id="passwordStrengthMeterContainer">
+                            <div class="password-strength-head">
+                                <span>Password strength</span>
+                                <span id="passwordStrengthLabel">Waiting for input</span>
+                            </div>
+                            <div class="password-strength-meter">
+                                <div class="password-strength-bar" id="passwordStrengthBar"></div>
+                            </div>
+                            <div class="password-checks">
+                                <div class="password-check" data-password-check="length"><i class="bi bi-check2-circle"></i><span>At least 8 characters</span></div>
+                                <div class="password-check" data-password-check="letter"><i class="bi bi-check2-circle"></i><span>Contains letters</span></div>
+                                <div class="password-check" data-password-check="number"><i class="bi bi-check2-circle"></i><span>Contains numbers</span></div>
+                                <div class="password-check" data-password-check="match"><i class="bi bi-check2-circle"></i><span>Passwords match</span></div>
+                            </div>
+                        </div>
+
+                        <div class="signup-row-2">
+                            <div class="signup-field">
+                                <label class="signup-field-label" for="id_phone">
+                                    <span>Phone number</span>
+                                    <small>Optional</small>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                    <input type="tel" name="phone" class="form-control" id="id_phone" placeholder="Enter phone number">
+                                </div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="signup-field">
+                                <label class="signup-field-label" for="id_department">
+                                    <span>Department</span>
+                                    <small>Optional</small>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-building"></i></span>
+                                    <select name="department" class="form-select" id="id_department">
+                                        <option value="">Select department</option>
+                                        {% for dept in departments %}
+                                        <option value="{{ dept.id }}">{{ dept.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+
+                        <div class="signup-field">
+                            <label class="signup-field-label" for="id_role">
+                                <span>Role</span>
+                                <small>Required</small>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                <select name="role" class="form-select" id="id_role">
+                                    <option value="HOST" selected>Host</option>
+                                    <option value="SECURITY">Security</option>
+                                    <option value="ADMIN">Admin</option>
+                                </select>
+                            </div>
+                            <div class="invalid-feedback"></div>
+                            <div class="signup-role-note is-active" id="roleHelpText">
+                                <strong>Host access</strong>
+                                Create and manage your own visitor requests and approvals.
+                            </div>
+                        </div>
+
+                        <div class="signup-field security-code-container" id="securityCodeContainer">
+                            <label class="signup-field-label" for="id_security_code">
+                                <span>Security code</span>
+                                <small>Protected roles only</small>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
+                                <input type="text" name="security_code" class="form-control" id="id_security_code" placeholder="Enter secure registration code" autocomplete="off">
+                            </div>
+                            <div class="invalid-feedback"></div>
+                            <p class="signup-helper">Required for Security and Admin account creation.</p>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary fw-bold signup-submit" id="signupBtn">
+                                <i class="bi bi-person-plus me-2"></i>Create Account
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="signup-footer">
+                        Already have an account?
+                        <a href="{% url 'login' %}">Sign In</a>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

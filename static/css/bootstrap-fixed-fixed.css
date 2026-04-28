@@ -1,0 +1,23 @@
+/*! Bootstrap v5.3.3 - Fixed CSS Linter Version */
+/* Valid CSS overrides for common linter warnings in Bootstrap */
+
+::file-selector-button {
+    -webkit-appearance: button;
+    appearance: button;
+}
+
+[type=search] {
+    -webkit-appearance: textfield;
+    appearance: textfield;
+}
+
+::-webkit-file-upload-button {
+    -webkit-appearance: button;
+    appearance: button;
+}
+
+/* Additional common fixes if needed */
+::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+}
