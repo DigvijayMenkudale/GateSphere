@@ -11,10 +11,10 @@ It provides a structured and secure way to manage visitor registration, approval
 Managing visitors manually can lead to errors, delays, and security risks. GateSphere solves this problem by providing a centralized and efficient digital solution.
 
 The system enables:
-- Easy visitor registration
-- Approval-based access control
-- Real-time visitor tracking
-- Role-based dashboards
+- Easy visitor registration  
+- Approval-based access control  
+- Real-time visitor tracking  
+- Role-based dashboards  
 
 ---
 
@@ -55,8 +55,6 @@ The system enables:
 
 Visitor Registration → Approval → Check-In → Check-Out
 
-
-This ensures a clear and controlled visitor lifecycle.
 
 ---
 
@@ -102,14 +100,23 @@ python manage.py migrate
 python manage.py runserver
 6️⃣ Open in Browser
 http://127.0.0.1:8000/
-📷 Screenshots
+## 📷 Screenshots
 
-Add screenshots of:
+### 🌐 Landing Page
+![Landing](./screenshots/landing.png)
 
-Login Page
-Dashboard
-Visitor Form
-Check-In Panel
+### 🔐 Login Page
+![Login](./screenshots/login.png)
+
+### 📊 Admin Dashboard
+![Dashboard](./screenshots/dashboard.png)
+
+### 🛡️ Security Visitor Console
+![Visitor Console](./screenshots/visitor-console.png)
+
+### 🚪 Check-In Panel
+![Check-In](./screenshots/checkin.png)
+
 🧪 Testing & Validation
 Functional testing completed
 Role-based workflows verified
